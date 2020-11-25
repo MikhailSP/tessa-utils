@@ -221,6 +221,37 @@ class AddUserToIusrsStep : Step
     }
 }
 
+class CreateAppPool : Step
+{
+    CreateAppPool([object] $json): base("Creating tessa application pool", $json){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $poolName =  $this.GetValueOrLogError("pool-name")
+        $poolAccount =  $this.GetValueOrLogError("pool-account")
+        $poolPassword =  $this.GetValueOrLogError("pool-account-password")
+        Write-Verbose "Creating tessa application pool '$poolName'. Account: '$poolAccount', Password: '$poolPassword'"
+    
+        Import-Module WebAdministration
+    
+        $poolPath="IIS:\AppPools\" + $poolName
+        if(!(Test-Path ($poolPath)))
+        {
+            $appPool = New-Item ($poolPath)
+            Set-ItemProperty -Path $poolPath -Name processmodel.identityType -Value 3
+            Set-ItemProperty -Path $poolPath -Name processmodel.userName -Value $poolAccount
+            Set-ItemProperty -Path $poolPath -Name processmodel.password -Value $poolPassword
+            Set-ItemProperty -Path $poolPath -Name processmodel.maxProcesses -Value (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+            Set-ItemProperty -Path $poolPath -Name managedRuntimeVersion -Value ""
+            Write-Host -ForegroundColor Gray "Tessa application pool '$poolName' was created. Pool account '$poolAccount'"
+        } 
+        else
+        {
+            Write-Host -ForegroundColor Gray "Tessa application pool '$poolName' already created. Skipping step."     
+        }     
+    }
+}
+
+
 function Install-TessaPrerequisites
 {
     <#
@@ -252,6 +283,7 @@ function Install-TessaPrerequisites
     $steps += [NewSslCertificateStep]::new($webRole.'iis')
     $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime')
     $steps += [AddUserToIusrsStep]::new($webRole.'iis')
+    $steps += [CreateAppPool]::new($webRole.'iis')
 
 
     foreach ($step in $steps)
