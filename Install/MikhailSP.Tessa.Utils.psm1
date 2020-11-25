@@ -300,7 +300,7 @@ class RequireSslStep : Step
 
 class EnableWinAuthStep : Step
 {
-    RequireSslStep([object] $json): base("Enabling windows authentication for Tessa", $json){}
+    EnableWinAuthStep([object] $json): base("Enabling windows authentication for Tessa", $json){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $site =  $this.GetValueOrLogError("site")
