@@ -252,6 +252,30 @@ class CreateAppPool : Step
 }
 
 
+class CopyTessaWebStep : Step
+{
+    CopyTessaWebStep([object] $json): base("Copying tessa web files to IIS folder", $json){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $tessaFolder =  $this.GetValueOrLogError("tessa-folder")
+        $tessaDistrib= "c:\Dev\tessa-3.5.0" #TODO get from prerequisites.json roles.common."tessa-distrib"
+        $licenseFile= "c:\Dev\МОНТ.tlic" #TODO get from prerequisites.json roles.common.license
+    
+        if(![System.IO.Directory]::Exists($tessaFolder))
+        {
+            New-Item -ItemType Directory -Force -Path $tessaFolder
+        }
+    
+        Copy-Item -Path "$tessaDistrib\Services\*" -Destination $tessaFolder -Recurse
+    
+        Write-Host -ForegroundColor Gray "Copying Tessa license file to '$tessaFolder'";
+        Copy-Item -Path "$licenseFile" -Destination $tessaFolder
+
+        Write-Host -ForegroundColor Gray "Tessa web files were copied from '$tessaDistrib\Services' to Tessa folder in IIS '$tessaFolder'";
+    }
+}
+
+
 function Install-TessaPrerequisites
 {
     <#
@@ -284,6 +308,7 @@ function Install-TessaPrerequisites
     $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime')
     $steps += [AddUserToIusrsStep]::new($webRole.'iis')
     $steps += [CreateAppPool]::new($webRole.'iis')
+    $steps += [CopyTessaWebStep]::new($webRole.'iis')
 
 
     foreach ($step in $steps)
