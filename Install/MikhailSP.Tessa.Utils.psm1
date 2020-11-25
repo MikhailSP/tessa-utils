@@ -275,6 +275,17 @@ class CopyTessaWebStep : Step
     }
 }
 
+class ConvertFolderToWebApplicationStep : Step
+{
+    ConvertFolderToWebApplicationStep([object] $json): base("Converting Tessa folder in IIS to a Web Application", $json){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $site =  $this.GetValueOrLogError("site")
+        $poolName =  $this.GetValueOrLogError("pool-name")
+        ConvertTo-WebApplication "IIS:\Sites\$site\tessa\web" -ApplicationPool $poolName
+        Write-Host -ForegroundColor Gray "Tessa folder in IIS was converted to a Web Application";
+    }
+}
 
 function Install-TessaPrerequisites
 {
@@ -309,6 +320,7 @@ function Install-TessaPrerequisites
     $steps += [AddUserToIusrsStep]::new($webRole.'iis')
     $steps += [CreateAppPool]::new($webRole.'iis')
     $steps += [CopyTessaWebStep]::new($webRole.'iis')
+    $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')
 
 
     foreach ($step in $steps)
