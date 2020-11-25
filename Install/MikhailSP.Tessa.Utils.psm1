@@ -171,6 +171,41 @@ class NewSslCertificateStep : Step {
     }
 }
 
+class InstallCoreHostingRuntimeStep: Step
+{
+    InstallCoreHostingRuntimeStep([object]$json): base("Installing .NET Core Runtime & Windows Hosting Bundle", $json, @([Role]::Web)){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        switch($TessaVersion)
+        {
+            ([Version]::v3_5_0)
+            {
+                #
+                # Reference: https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/?view=aspnetcore-3.1
+                #
+                $tempFolder="c:\temp\" #TODO get from prerequisites.json roles.common.paths.temp
+                $whbUrl=$this.GetValueOrLogError("url")
+                Write-Verbose "Downloading installer from '$whbUrl' to '$tempFolder'"
+
+                if( ![System.IO.Directory]::Exists( $tempFolder ) )
+                {
+                    New-Item -ItemType Directory -Force -Path $tempFolder
+                }
+                
+                $whbInstallerFile = $tempFolder + [System.IO.Path]::GetFileName( $whbUrl )
+
+                Invoke-WebRequest -Uri $whbUrl -OutFile $whbInstallerFile
+                Write-Host "Windows Hosting Bundle Installer downloaded. Installing..."
+                Start-Process -FilePath $whbInstallerFile -ArgumentList "/passive" -Wait
+                net stop was /y
+                net start w3svc     
+            }
+            default{throw "Unknown version '$TessaVersion' for step '$($this.StepName)'"}
+        }
+        Write-Host -ForegroundColor Gray ".NET Core Runtime & Windows Hosting Bundle installed";
+    }
+}
+
 function Install-TessaPrerequisites
 {
     <#
@@ -200,6 +235,7 @@ function Install-TessaPrerequisites
     $steps += [SetTimeZoneStep]::new($commonRole.'timezone')
     $steps += [InstallIisStep]::new($webRole.'iis')
     $steps += [NewSslCertificateStep]::new($webRole.'iis')
+    $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime')
 
 
     foreach ($step in $steps)
