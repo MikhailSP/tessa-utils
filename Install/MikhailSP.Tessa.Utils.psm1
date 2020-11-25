@@ -206,6 +206,21 @@ class InstallCoreHostingRuntimeStep: Step
     }
 }
 
+class AddUserToIusrsStep : Step
+{
+    AddUserToIusrsStep([object] $json): base("Adding tessa pool account to IIS_IUSRS group", $json){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $poolAccount =  $this.GetValueOrLogError("pool-account")
+
+        $de = [ADSI]"WinNT://$env:computername/IIS_IUSRS,group";        
+        $appPoolPartOfAddress=$poolAccount.Replace("\","/");
+        $de.psbase.Invoke("Add",([ADSI]"WinNT://$appPoolPartOfAddress").path);
+    
+        Write-Host -ForegroundColor Gray "Tessa pool account '$poolAccount' was added to IIS_IUSRS group";
+    }
+}
+
 function Install-TessaPrerequisites
 {
     <#
@@ -236,6 +251,7 @@ function Install-TessaPrerequisites
     $steps += [InstallIisStep]::new($webRole.'iis')
     $steps += [NewSslCertificateStep]::new($webRole.'iis')
     $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime')
+    $steps += [AddUserToIusrsStep]::new($webRole.'iis')
 
 
     foreach ($step in $steps)
