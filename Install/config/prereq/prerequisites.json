@@ -24,7 +24,7 @@
         "tessa-folder": "c:\\inetpub\\wwwroot\\tessa"
       },
       "core-runtime": {
-        "url" : "https://dotnet.microsoft.com/download/dotnet-core/thank-you/runtime-aspnetcore-3.1.10-windows-hosting-bundle-installer"
+        "url" : "https://download.visualstudio.microsoft.com/download/pr/7e35ac45-bb15-450a-946c-fe6ea287f854/a37cfb0987e21097c7969dda482cebd3/dotnet-hosting-3.1.10-win.exe"
       }
     },
     "chronos": {
