@@ -298,6 +298,17 @@ class RequireSslStep : Step
     }
 }
 
+class EnableWinAuthStep : Step
+{
+    RequireSslStep([object] $json): base("Enabling windows authentication for Tessa", $json){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $site =  $this.GetValueOrLogError("site")
+        Set-WebConfigurationProperty -Filter "/system.webServer/security/authentication/windowsAuthentication" -Name Enabled -Value True -PSPath "IIS:\" -Location "$site/tessa/web"
+        Write-Host -ForegroundColor Gray "Windows authentication enabled on Tessa application";
+    }
+}
+
 function Install-TessaPrerequisites
 {
     <#
@@ -333,6 +344,7 @@ function Install-TessaPrerequisites
     $steps += [CopyTessaWebStep]::new($webRole.'iis')
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')
     $steps += [RequireSslStep]::new($webRole.'iis')
+    $steps += [EnableWinAuthStep]::new($webRole.'iis')
 
 
     foreach ($step in $steps)
