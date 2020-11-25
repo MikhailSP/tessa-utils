@@ -43,9 +43,9 @@ class Step
         $this.DoStep($ServerRoles, $TessaVersion)
     }
     
-    [string] GetValueOrLogError([string] $jsonSection)
+    [object] GetValueOrLogError([string] $jsonSection)
     {
-        [string] $value=$this.Json."$jsonSection";
+        [object] $value=$this.Json."$jsonSection";
         if ($Null -eq $value)
         {
             throw "No section '$jsonSection' value in config"
@@ -150,6 +150,27 @@ class InstallIisStep: Step
     }
 }
 
+class NewSslCertificateStep : Step {
+    NewSslCertificateStep([object]$json): base("Creating self-signed SSL certificate and bindings", $json, @([Role]::Web)){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        Import-Module WebAdministration
+        Set-Location IIS:\SslBindings
+
+        $webSite=$this.GetValueOrLogError("site")
+        $webPort=$this.GetValueOrLogError("port")
+        $dnsName=$this.GetValueOrLogError("dns-name")
+        Write-Verbose "Creating binding for site '$webSite' on $webPort port with certificate for '$dnsName'"
+
+        New-WebBinding -Name $webSite -IP "*" -Port $webPort -Protocol https
+
+        $c = New-SelfSignedCertificate -DnsName $dnsName -CertStoreLocation cert:\LocalMachine\My
+
+        $c | New-Item 0.0.0.0!$webPort
+        Write-Host -ForegroundColor Gray "Self-signed SSL certificate and bindings for '$webSite' on $webPort port created";
+    }
+}
+
 function Install-TessaPrerequisites
 {
     <#
@@ -178,6 +199,7 @@ function Install-TessaPrerequisites
     $steps += [NewKeyboardLayoutStep]::new($commonRole.'keyboard-layout')
     $steps += [SetTimeZoneStep]::new($commonRole.'timezone')
     $steps += [InstallIisStep]::new($webRole.'iis')
+    $steps += [NewSslCertificateStep]::new($webRole.'iis')
 
 
     foreach ($step in $steps)

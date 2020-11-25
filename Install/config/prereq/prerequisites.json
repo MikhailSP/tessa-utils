@@ -9,7 +9,11 @@
       }
     },
     "web": {
-      "iis": {}
+      "iis": {
+        "site" : "Default Web Site",
+        "port" : 443,
+        "dns-name" : "Tessa"
+      }
     },
     "chronos": {
       
