@@ -1,0 +1,21 @@
+﻿{
+  "roles": {
+    "common": {
+      "keyboard-layout": {
+        "layout": "ru-RU"
+      },
+      "timezone": {
+        "name": "Russia TZ 2 Standard Time"
+      }
+    },
+    "web": {
+      "iis": {}
+    },
+    "chronos": {
+      
+    },
+    "sql": {
+      
+    }
+  }
+}
