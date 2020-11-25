@@ -287,6 +287,17 @@ class ConvertFolderToWebApplicationStep : Step
     }
 }
 
+class RequireSslStep : Step
+{
+    RequireSslStep([object] $json): base("Require SSL for Tessa", $json){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $site =  $this.GetValueOrLogError("site")
+        Set-WebConfiguration -PSPath "machine/webroot/apphost" -Location "$site/tessa" -Filter "system.webserver/security/access" -Value "Ssl"
+        Write-Host -ForegroundColor Gray "Tessa application set to require SSL";
+    }
+}
+
 function Install-TessaPrerequisites
 {
     <#
@@ -321,6 +332,7 @@ function Install-TessaPrerequisites
     $steps += [CreateAppPool]::new($webRole.'iis')
     $steps += [CopyTessaWebStep]::new($webRole.'iis')
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')
+    $steps += [RequireSslStep]::new($webRole.'iis')
 
 
     foreach ($step in $steps)
