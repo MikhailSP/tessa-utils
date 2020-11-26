@@ -309,6 +309,56 @@ class EnableWinAuthStep : Step
     }
 }
 
+class GenerateNewSecurityTokenStep : Step
+{
+    GenerateNewSecurityTokenStep([object] $json): base("Generating new security tokens (Signature and Cipher) for Tessa web services", $json){}
+
+    [void] UpdateToken([string] $tokenType,[string] $tadminFile, [string] $tessaFolderInIis){
+        $result=Execute-CommandWithExceptionOnErrorCode -CommandPath $tadminFile -CommandArguments "GetKey","$tokenType"
+        $token=$result.stdout
+        Write-Verbose "Generated new $tokenType token: '$token'"
+        $result=Execute-Command -CommandPath $tadminFile -CommandArguments "SetKey","$tokenType","/path:$tessaFolderInIis","/value:$token"
+        Write-Verbose "Saved $tokenType token: '$($result.stdout)'"
+    }
+    
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $tessaFolderInIis =  $this.GetValueOrLogError("tessa-folder")
+        $tessaDistribFolder = "c:\Dev\tessa-3.5.0" # TODO get from prerequisites.json roles.common."tessa-distrib"
+        $tadminFile=Join-Path -Path $tessaDistribFolder -Child "Tools\tadmin"
+        Write-Verbose "Prepare for running tadmin from '$tadminFile' for Tessa IIS Path '$tessaFolderInIis'"
+        $this.UpdateToken("Signature", $tadminFile, $tessaFolderInIis)
+        $this.UpdateToken("Cipher", $tadminFile, $tessaFolderInIis)
+        Write-Host -ForegroundColor Gray "New security tokens for Tessa web services generated and set";
+    }
+}
+
+function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
+{
+    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+    $pinfo.FileName = $CommandPath
+    $pinfo.RedirectStandardError = $true
+    $pinfo.RedirectStandardOutput = $true
+    $pinfo.UseShellExecute = $false
+    $pinfo.Arguments = $CommandArguments
+    $p = New-Object System.Diagnostics.Process
+    $p.StartInfo = $pinfo
+    $p.Start() | Out-Null
+    [pscustomobject]@{
+        stdout = $p.StandardOutput.ReadToEnd()
+        stderr = $p.StandardError.ReadToEnd()
+        exitCode = $p.ExitCode
+    }
+    $p.WaitForExit()
+}
+
+function Execute-CommandWithExceptionOnErrorCode ([string]$CommandPath, [string[]]$CommandArguments){
+    $result=Execute-Command -CommandPath $CommandPath -CommandArguments $CommandArguments
+    if ($result.exitCode -ne 0){
+        throw "Calling '$CommandPath' with arguments '$CommandArguments' returned exit code $($result.exitCode). Stderr: '$($result.stderr)'. Stdout: '$($result.stdout)'"
+    }
+    $result
+}
+
 function Install-TessaPrerequisites
 {
     <#
@@ -346,6 +396,7 @@ function Install-TessaPrerequisites
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')      # 3.3.5
     $steps += [RequireSslStep]::new($webRole.'iis')                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
+    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis')           # 3.4
 
 
     foreach ($step in $steps)
