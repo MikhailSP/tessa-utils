@@ -385,8 +385,8 @@ class CopyChronosStep : Step
 {
     [string] $TessaDistribPath
     [string] $LicenseFile
-    
-    EnableWinAuthStep([object] $json, [string] $tessaDistribPath,[string] $licenseFile): base("Copying Chronos to folder", $json, [Role]::Chronos){
+
+    CopyChronosStep([object] $json, [string] $tessaDistribPath,[string] $licenseFile): base("Copying Chronos to folder", $json, [Role]::Chronos){
         $this.TesasDistribPath=tessaDistribPath
         $this.LicenseFile=$licenseFile
     }
@@ -403,7 +403,7 @@ class AttachSqlIsoStep : Step
 {
     AttachSqlIsoStep([object] $json): base("Attaching SQL ISO file", $json, [Role]::Sql){}
 
-    [void] AttachSqlIsoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $isoPath =  $this.GetValueOrLogError("iso-path")
         $mountResult=Mount-DiskImage -ImagePath $isoPath -PassThru;
         $global:SqlDistribDriveLetter=($mountResult | Get-Volume).DriveLetter;
@@ -415,7 +415,7 @@ class InstallSqlStep : Step
 {
     InstallSqlStep([object] $json): base("Installing MS SQL Server", $json, [Role]::Sql){}
 
-    [void] AttachSqlIsoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $iniFile =  $this.GetValueOrLogError("ini-file")
         $admin =  $this.GetValueOrLogError("admin")
         $admin2 =  $this.GetValueOrLogError("admin2")
@@ -435,7 +435,7 @@ class InstallSsmsStep : Step
         $this.TempFolder=$tempFolder
     }
 
-    [void] AttachSqlIsoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $iniFile =  $this.GetValueOrLogError("ini-file")
         $admin =  $this.GetValueOrLogError("admin")
         $admin2 =  $this.GetValueOrLogError("admin2")
@@ -457,6 +457,17 @@ class InstallSsmsStep : Step
 
         Start-Process -FilePath $ssmsInstaller -ArgumentList "/passive" -Wait
         Write-Host -ForegroundColor Gray "MS SQL Server Management Studio installed";
+    }
+}
+
+class DetachSqlIsoStep : Step
+{
+    DetachSqlIsoStep([object] $json): base("Detaching SQL ISO file", $json, [Role]::Sql){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $isoPath =  $this.GetValueOrLogError("iso-path")
+        Dismount-DiskImage -ImagePath $isoPath;
+        Write-Host -ForegroundColor Gray "SQL ISO file detached";
     }
 }
 
@@ -539,6 +550,7 @@ function Install-TessaPrerequisites
     $steps += [AttachSqlIsoStep]::new($sqlRole)                                      
     $steps += [InstallSqlStep]::new($sqlRole)                                      
     $steps += [InstallSsmsStep]::new($sqlRole,$tempFolder)                                      
+    $steps += [DetachSqlIsoStep]::new($sqlRole)                                      
 
     foreach ($step in $steps)
     {
