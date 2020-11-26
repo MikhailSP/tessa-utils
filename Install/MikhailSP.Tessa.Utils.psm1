@@ -317,18 +317,23 @@ class GenerateNewSecurityTokenStep : Step
         $result=Execute-CommandWithExceptionOnErrorCode -CommandPath $tadminFile -CommandArguments "GetKey","$tokenType"
         $token=$result.stdout
         Write-Verbose "Generated new $tokenType token: '$token'"
-        $result=Execute-Command -CommandPath $tadminFile -CommandArguments "SetKey","$tokenType","/path:$tessaFolderInIis","/value:$token"
+        $result=Execute-CommandWithExceptionOnErrorCode -CommandPath $tadminFile -CommandArguments "SetKey","$tokenType","/path:$tessaFolderInIis","/value:$token"
         Write-Verbose "Saved $tokenType token: '$($result.stdout)'"
     }
     
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $tessaFolderInIis =  $this.GetValueOrLogError("tessa-folder")
+        $tessaPoolName =  $this.GetValueOrLogError("pool-name")
         $tessaDistribFolder = "c:\Dev\tessa-3.5.0" # TODO get from prerequisites.json roles.common."tessa-distrib"
         $tadminFile=Join-Path -Path $tessaDistribFolder -Child "Tools\tadmin"
         Write-Verbose "Prepare for running tadmin from '$tadminFile' for Tessa IIS Path '$tessaFolderInIis'"
+
         $this.UpdateToken("Signature", $tadminFile, $tessaFolderInIis)
         $this.UpdateToken("Cipher", $tadminFile, $tessaFolderInIis)
         Write-Host -ForegroundColor Gray "New security tokens for Tessa web services generated and set";
+
+        Restart-WebAppPool -Name $tessaPoolName
+        Write-Host -ForegroundColor Gray "Application pool '$tessaPoolName' restarted";
     }
 }
 
