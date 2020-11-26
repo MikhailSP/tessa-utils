@@ -313,7 +313,11 @@ class EnableWinAuthStep : Step
 
 class GenerateNewSecurityTokenStep : Step
 {
-    GenerateNewSecurityTokenStep([object] $json): base("Generating new security tokens (Signature and Cipher) for Tessa web services", $json){}
+    [string] $TessaDistribPath
+    
+    GenerateNewSecurityTokenStep([object] $json, [string] $tessaDistribPath): base("Generating new security tokens (Signature and Cipher) for Tessa web services", $json){
+        $this.TessaDistribPath=$tessaDistribPath
+    }
 
     [void] UpdateToken([string] $tokenType,[string] $tadminFile, [string] $tessaFolderInIis){
         $result=Execute-CommandWithExceptionOnErrorCode -CommandPath $tadminFile -CommandArguments "GetKey","$tokenType"
@@ -326,8 +330,7 @@ class GenerateNewSecurityTokenStep : Step
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $tessaFolderInIis =  $this.GetValueOrLogError("tessa-folder")
         $tessaPoolName =  $this.GetValueOrLogError("pool-name")
-        $tessaDistribFolder = "c:\Dev\tessa-3.5.0" # TODO get from prerequisites.json roles.common."tessa-distrib"
-        $tadminFile=Join-Path -Path $tessaDistribFolder -Child "Tools\tadmin"
+        $tadminFile=Join-Path -Path $this.TessaDistribPath -Child "Tools\tadmin"
         Write-Verbose "Prepare for running tadmin from '$tadminFile' for Tessa IIS Path '$tessaFolderInIis'"
 
         $this.UpdateToken("Signature", $tadminFile, $tessaFolderInIis)
@@ -456,8 +459,8 @@ function Install-TessaPrerequisites
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')      # 3.3.5
     $steps += [RequireSslStep]::new($webRole.'iis')                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
-    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis')           # 3.4
-    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")  # 3.5
+    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                     # 3.4
+    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")    # 3.5
     $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath)  # 3.6
 
 
