@@ -427,6 +427,39 @@ class InstallSqlStep : Step
     }
 }
 
+class InstallSsmsStep : Step
+{
+    [string] $TempFolder
+    
+    InstallSsmsStep([object] $json, [string] $tempFolder): base("Installing MS SQL Server Management Studio", $json, [Role]::Sql){
+        $this.TempFolder=$tempFolder
+    }
+
+    [void] AttachSqlIsoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $iniFile =  $this.GetValueOrLogError("ini-file")
+        $admin =  $this.GetValueOrLogError("admin")
+        $admin2 =  $this.GetValueOrLogError("admin2")
+        $sqlSetupPath=-join("$SqlDistribDriveLetter",":/setup.exe");
+    
+        if(![System.IO.Directory]::Exists($this.TempFolder))
+        {
+            New-Item -ItemType Directory -Force -Path $this.TempFolder;
+        }
+    
+        $ssmsInstaller = "$($this.TempFolder)\SSMS-Setup-RUS.exe";
+        if (Test-Path -Path $ssmsInstaller){
+            Write-Verbose "SQL Server Management Studio Installer already downloaded"
+        }
+        else {
+            Invoke-WebRequest -Uri $SqlManagementStudioUrl  -OutFile $$ssmsInstaller
+            Write-Host "SQL Server Management Studio Installer downloaded"
+        } 
+
+        Start-Process -FilePath $ssmsInstaller -ArgumentList "/passive" -Wait
+        Write-Host -ForegroundColor Gray "MS SQL Server Management Studio installed";
+    }
+}
+
 function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
 {
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -505,6 +538,7 @@ function Install-TessaPrerequisites
     $steps += [ChangeAppJsonStep]::new($chronosRole,$EnvironmentName,"$($chronosRole.folder)\app.json")   # 3.6
     $steps += [AttachSqlIsoStep]::new($sqlRole)                                      
     $steps += [InstallSqlStep]::new($sqlRole)                                      
+    $steps += [InstallSsmsStep]::new($sqlRole,$tempFolder)                                      
 
     foreach ($step in $steps)
     {
