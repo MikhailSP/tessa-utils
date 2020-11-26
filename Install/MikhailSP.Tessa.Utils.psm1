@@ -256,24 +256,28 @@ class CreateAppPool : Step
 
 class CopyTessaWebStep : Step
 {
-    CopyTessaWebStep([object] $json): base("Copying tessa web files to IIS folder", $json){}
+    [string] $TessaDistribPath
+    [string] $LicenseFile
+
+    CopyTessaWebStep([object] $json, [string] $tessaDistribPath, [string] $licenseFile): base("Copying tessa web files to IIS folder", $json){
+        $this.TessaDistribPath=$tessaDistribPath
+        $this.LicenseFile=$licenseFile
+    }
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $tessaFolder =  $this.GetValueOrLogError("tessa-folder")
-        $tessaDistrib= "c:\Dev\tessa-3.5.0" #TODO get from prerequisites.json roles.common."tessa-distrib"
-        $licenseFile= "c:\Dev\МОНТ.tlic" #TODO get from prerequisites.json roles.common.license
     
         if(![System.IO.Directory]::Exists($tessaFolder))
         {
             New-Item -ItemType Directory -Force -Path $tessaFolder
         }
     
-        Copy-Item -Path "$tessaDistrib\Services\*" -Destination $tessaFolder -Recurse
+        Copy-Item -Path "$($this.TessaDistribPath)\Services\*" -Destination $tessaFolder -Recurse
     
         Write-Host -ForegroundColor Gray "Copying Tessa license file to '$tessaFolder'";
-        Copy-Item -Path "$licenseFile" -Destination $tessaFolder
+        Copy-Item -Path $this.LicenseFile -Destination $tessaFolder
 
-        Write-Host -ForegroundColor Gray "Tessa web files were copied from '$tessaDistrib\Services' to Tessa folder in IIS '$tessaFolder'";
+        Write-Host -ForegroundColor Gray "Tessa web files were copied from '$($this.TessaDistribPath)\Services' to Tessa folder in IIS '$tessaFolder'";
     }
 }
 
@@ -445,6 +449,7 @@ function Install-TessaPrerequisites
     $sqlRole = $json.roles.sql
     $tessaFolderInIis=$webRole.iis.'tessa-folder'
     $tessaDistribPath=$commonRole.'tessa-distrib'
+    $licenseFile=$commonRole.paths.license
 
     # Below are step numbers for Tessa 3.5.0 according to https://mytessa.ru/docs/InstallationGuide/InstallationGuide.html
     [Step[]]$steps = @()
@@ -455,7 +460,7 @@ function Install-TessaPrerequisites
     $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime') # 3.1
     $steps += [AddUserToIusrsStep]::new($webRole.'iis')                     # 3.2
     $steps += [CreateAppPool]::new($webRole.'iis')                          # 3.3.1
-    $steps += [CopyTessaWebStep]::new($webRole.'iis')                       # 3.3.4
+    $steps += [CopyTessaWebStep]::new($webRole.'iis',$tessaDistribPath,$licenseFile)                    # 3.3.4
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')      # 3.3.5
     $steps += [RequireSslStep]::new($webRole.'iis')                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
