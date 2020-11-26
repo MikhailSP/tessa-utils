@@ -403,6 +403,7 @@ function Install-TessaPrerequisites
         Установить пререквизиты (вещи, обязательные для установки Tessa, например, IIS для сервера приложений)
         .PARAMETER ServerRoles Роли сервера
         .PARAMETER TessaVersion Версия Тессы, пререквизиты к которой надо поставить
+        .PARAMETER EnvironmentName Название окружения. При изменении конфигов возьмутся данные из JSON с соответствующим префиксом. Напирмер, "dev-pushin"
     #>
     [CmdletBinding()]
     param(
@@ -410,7 +411,10 @@ function Install-TessaPrerequisites
         $ServerRoles,
         
         [Version]
-        $TessaVersion
+        $TessaVersion,
+    
+        [string]
+        $EnvironmentName
     )
 
     Write-Verbose "Installing Tessa $TessaVersion prerequisites for roles $( $ServerRoles|foreach { $_ } )"
@@ -436,7 +440,7 @@ function Install-TessaPrerequisites
     $steps += [RequireSslStep]::new($webRole.'iis')                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
     $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis')           # 3.4
-    $steps += [ChangeAppJsonStep]::new($webRole.'iis',"dev-pushin","$tessaFolderInIis\app.json")  # 3.5
+    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")  # 3.5
 
 
     foreach ($step in $steps)
