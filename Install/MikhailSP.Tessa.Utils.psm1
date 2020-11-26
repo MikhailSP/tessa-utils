@@ -471,10 +471,10 @@ function Install-TessaPrerequisites
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')                      # 3.3.5
     $steps += [RequireSslStep]::new($webRole.'iis')                                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                                      # 3.3.7
-    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                     # 3.4
-    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")    # 3.5
-    $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath,$licenseFile)                 # 3.6
-
+    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                             # 3.4
+    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")            # 3.5
+    $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath,$licenseFile)                         # 3.6
+    $steps += [ChangeAppJsonStep]::new($webRole.'chronos',$EnvironmentName,"$($chronosRole.folder)\app.json")   # 3.6
 
     foreach ($step in $steps)
     {
