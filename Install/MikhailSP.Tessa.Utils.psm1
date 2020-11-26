@@ -411,6 +411,22 @@ class AttachSqlIsoStep : Step
     }
 }
 
+class InstallSqlStep : Step
+{
+    InstallSqlStep([object] $json): base("Installing MS SQL Server", $json, [Role]::Sql){}
+
+    [void] AttachSqlIsoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $iniFile =  $this.GetValueOrLogError("ini-file")
+        $admin =  $this.GetValueOrLogError("admin")
+        $admin2 =  $this.GetValueOrLogError("admin2")
+        $sqlSetupPath=-join("$SqlDistribDriveLetter",":/setup.exe");
+        $arguments="/ConfigurationFile=$iniFile /IACCEPTSQLSERVERLICENSETERMS /SQLSYSADMINACCOUNTS=""BUILTIN\Administrators"" ""$admin"" ""$admin2""";
+        Write-Host -ForegroundColor Gray "Запуск '$sqlSetupPath' с параметрами '$arguments'"
+        Start-Process -FilePath $sqlSetupPath -ArgumentList $arguments -Wait
+        Write-Host -ForegroundColor Gray "MS SQL Server installed";
+    }
+}
+
 function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
 {
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -488,6 +504,7 @@ function Install-TessaPrerequisites
     $steps += [CopyChronosStep]::new($chronosRole,$tessaDistribPath,$licenseFile)                         # 3.6
     $steps += [ChangeAppJsonStep]::new($chronosRole,$EnvironmentName,"$($chronosRole.folder)\app.json")   # 3.6
     $steps += [AttachSqlIsoStep]::new($sqlRole)                                      
+    $steps += [InstallSqlStep]::new($sqlRole)                                      
 
     foreach ($step in $steps)
     {
