@@ -1,0 +1,9 @@
+{
+"ConnectionStrings": {
+	"default": "Server=localhost; Database=tessa; Integrated Security=true; Connect Timeout=200; pooling=true; Max Pool Size=200; MultipleActiveResultSets=true;"
+},
+
+"Settings": {
+	"ServerCode": "mpushin-dev"
+}
+}

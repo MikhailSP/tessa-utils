@@ -1,4 +1,6 @@
-﻿enum Role{
+﻿Import-Module "$PSScriptRoot\MikhailSP.Json.Utils.psm1" -Force -Verbose
+
+enum Role{
     Web
     Chronos
     Sql
@@ -337,6 +339,26 @@ class GenerateNewSecurityTokenStep : Step
     }
 }
 
+class ChangeAppJsonStep : Step
+{
+    ChangeAppJsonStep([object] $json): base("Changing app.json (merging with custom.json)", $json){}
+
+    [void] BackupJson([string] $targetJsonFile){
+        Copy-Item $targetJsonFile -Destination "$targetJsonFile.backup";
+    }
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $site =  $this.GetValueOrLogError("site")
+        $targetJsonFile="c:\inetpub\wwwroot\tessa\app.json" #TODO
+        $mergeWithJsonFile1="C:\Dev\Scripts\config\dev-pushin.json" #TODO
+        $mergeWithJsonFile2="C:\Dev\Scripts\config\dev-pushin.web.json" #TODO
+        $this.BackupJson -targetJsonFile $targetJsonFile;
+        Merge-JsonFiles -TargetFile $targetJsonFile -FilesToMerge $targetJsonFile,$mergeWithJsonFile1,$mergeWithJsonFile2
+        Write-Host -ForegroundColor Gray "app.json changed (merged with custom.json)";
+    }
+}
+
+
 function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
 {
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -402,6 +424,7 @@ function Install-TessaPrerequisites
     $steps += [RequireSslStep]::new($webRole.'iis')                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
     $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis')           # 3.4
+    $steps += [ChangeAppJsonStep]::new($webRole.'iis')                      # 3.5
 
 
     foreach ($step in $steps)
