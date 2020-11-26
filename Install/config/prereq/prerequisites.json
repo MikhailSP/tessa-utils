@@ -11,6 +11,16 @@
       },
       "timezone": {
         "name": "Russia TZ 2 Standard Time"
+      },
+      "soft" : {
+        "notepad-pp": {
+          "url" : "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.8.5/npp.7.8.5.Installer.x64.exe",
+          "argument": "/S"
+        },
+        "totalcmd": {
+          "url" : "https://totalcommander.ch/win/tcmd950x64.exe",
+          "argument": "/AGDU"
+        }
       }
     },
     "web": {

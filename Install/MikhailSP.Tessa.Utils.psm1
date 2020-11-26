@@ -436,11 +436,6 @@ class InstallSsmsStep : Step
     }
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
-        $iniFile =  $this.GetValueOrLogError("ini-file")
-        $admin =  $this.GetValueOrLogError("admin")
-        $admin2 =  $this.GetValueOrLogError("admin2")
-        $sqlSetupPath=-join("$SqlDistribDriveLetter",":/setup.exe");
-    
         if(![System.IO.Directory]::Exists($this.TempFolder))
         {
             New-Item -ItemType Directory -Force -Path $this.TempFolder;
@@ -451,7 +446,7 @@ class InstallSsmsStep : Step
             Write-Verbose "SQL Server Management Studio Installer already downloaded"
         }
         else {
-            Invoke-WebRequest -Uri $SqlManagementStudioUrl  -OutFile $$ssmsInstaller
+            Invoke-WebRequest -Uri $SqlManagementStudioUrl  -OutFile $ssmsInstaller
             Write-Host "SQL Server Management Studio Installer downloaded"
         } 
 
@@ -468,6 +463,37 @@ class DetachSqlIsoStep : Step
         $isoPath =  $this.GetValueOrLogError("iso-path")
         Dismount-DiskImage -ImagePath $isoPath;
         Write-Host -ForegroundColor Gray "SQL ISO file detached";
+    }
+}
+
+class DownloadAndInstallStep : Step
+{
+    [string] $TempFolder
+    [string] $SoftName
+    
+    DownloadAndInstallStep([object] $json, [string] $tempFolder, [string] $softName): base("Downloading and installing $softName", $json){
+        $this.TempFoldet=$tempFolder
+        $this.SoftName=$softName
+    }
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $url=$this.GetValueOrLogError("url")
+        $argument=$this.GetValueOrLogError("argument")
+        if(![System.IO.Directory]::Exists($this.TempFolder))
+        {
+            New-Item -ItemType Directory -Force -Path $this.TempFolder;
+        }
+        $installer = $this.TempFolder + [System.IO.Path]::GetFileName($url)
+        if (Test-Path $installer){
+            Write-Verbose "$($this.SoftName) installer already downloaded"
+        }
+        else {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-WebRequest -Uri $url -OutFile $installer
+            Write-Host "$($this.SoftName) installer downloaded"
+        }
+        Start-Process -FilePath $installer -ArgumentList $argument -Wait
+        Write-Host -ForegroundColor Gray "$($this.SoftName) installed";
     }
 }
 
@@ -529,6 +555,7 @@ function Install-TessaPrerequisites
     $tessaFolderInIis=$webRole.iis.'tessa-folder'
     $tessaDistribPath=$commonRole.'tessa-distrib'
     $licenseFile=$commonRole.paths.license
+    $soft=$commonRole.soft
 
     # Below are step numbers for Tessa 3.5.0 according to https://mytessa.ru/docs/InstallationGuide/InstallationGuide.html
     [Step[]]$steps = @()
@@ -551,6 +578,8 @@ function Install-TessaPrerequisites
     $steps += [InstallSqlStep]::new($sqlRole)                                      
     $steps += [InstallSsmsStep]::new($sqlRole,$tempFolder)                                      
     $steps += [DetachSqlIsoStep]::new($sqlRole)                                      
+    $steps += [DownloadAndInstallStep]::new($soft.'notepad-pp',$tempFolder,"Notepad++")                                      
+    $steps += [DownloadAndInstallStep]::new($soft.'totalcmd',$tempFolder,"Total Commander")                                      
 
     foreach ($step in $steps)
     {
