@@ -384,14 +384,17 @@ class ChangeAppJsonStep : Step
 class CopyChronosStep : Step
 {
     [string] $TessaDistribPath
+    [string] $LicenseFile
     
-    EnableWinAuthStep([object] $json, [string] $tessaDistribPath): base("Copying Chronos to folder", $json, [Role]::Chronos){
+    EnableWinAuthStep([object] $json, [string] $tessaDistribPath,[string] $licenseFile): base("Copying Chronos to folder", $json, [Role]::Chronos){
         $this.TesasDistribPath=tessaDistribPath
+        $this.LicenseFile=$licenseFile
     }
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $chronosFolder =  $this.GetValueOrLogError("folder")
-        Copy-Item -Path "$($this.TesasDistribPath)\Chronos" -Destination $$chronosFolder -Recurse;
+        Copy-Item -Path "$($this.TesasDistribPath)\Chronos" -Destination $chronosFolder -Recurse;
+        Copy-Item -Path $this.LicenseFile -Destination $chronosFolder -Recurse;
         Write-Host -ForegroundColor Gray "Chronos was copied to folder";
     }
 }
@@ -470,7 +473,7 @@ function Install-TessaPrerequisites
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                                      # 3.3.7
     $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                     # 3.4
     $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")    # 3.5
-    $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath)                              # 3.6
+    $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath,$licenseFile)                 # 3.6
 
 
     foreach ($step in $steps)
