@@ -399,6 +399,18 @@ class CopyChronosStep : Step
     }
 }
 
+class AttachSqlIsoStep : Step
+{
+    AttachSqlIsoStep([object] $json): base("Attaching SQL ISO file", $json, [Role]::Sql){}
+
+    [void] AttachSqlIsoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $isoPath =  $this.GetValueOrLogError("iso-path")
+        $mountResult=Mount-DiskImage -ImagePath $isoPath -PassThru;
+        $global:SqlDistribDriveLetter=($mountResult | Get-Volume).DriveLetter;
+        Write-Host -ForegroundColor Gray "SQL ISO file attached";
+    }
+}
+
 function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
 {
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -471,10 +483,11 @@ function Install-TessaPrerequisites
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')                      # 3.3.5
     $steps += [RequireSslStep]::new($webRole.'iis')                                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                                      # 3.3.7
-    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                             # 3.4
-    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")            # 3.5
-    $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath,$licenseFile)                         # 3.6
-    $steps += [ChangeAppJsonStep]::new($webRole.'chronos',$EnvironmentName,"$($chronosRole.folder)\app.json")   # 3.6
+    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                       # 3.4
+    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")      # 3.5
+    $steps += [CopyChronosStep]::new($chronosRole,$tessaDistribPath,$licenseFile)                         # 3.6
+    $steps += [ChangeAppJsonStep]::new($chronosRole,$EnvironmentName,"$($chronosRole.folder)\app.json")   # 3.6
+    $steps += [AttachSqlIsoStep]::new($sqlRole)                                      
 
     foreach ($step in $steps)
     {
