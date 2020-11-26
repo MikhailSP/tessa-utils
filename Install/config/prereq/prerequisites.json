@@ -21,7 +21,8 @@
           "url" : "https://totalcommander.ch/win/tcmd950x64.exe",
           "argument": "/AGDU"
         }
-      }
+      },
+      "psremoting": {}
     },
     "web": {
       "iis": {

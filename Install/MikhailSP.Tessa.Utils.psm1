@@ -497,6 +497,18 @@ class DownloadAndInstallStep : Step
     }
 }
 
+
+class EnablePsRemotingStep : Step
+{
+    EnablePsRemotingStep([object] $json): base("Enabling PowerShell remoting", $json, [Role]::Sql){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        Enable-PSRemoting -Force;
+        Write-Host -ForegroundColor Gray "PowerShell remoting enabled";
+    }
+}
+
+
 function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
 {
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -580,6 +592,7 @@ function Install-TessaPrerequisites
     $steps += [DetachSqlIsoStep]::new($sqlRole)                                      
     $steps += [DownloadAndInstallStep]::new($soft.'notepad-pp',$tempFolder,"Notepad++")                                      
     $steps += [DownloadAndInstallStep]::new($soft.'totalcmd',$tempFolder,"Total Commander")                                      
+    $steps += [EnablePsRemotingStep]::new($commonRole.'psremoting')                                      
 
     foreach ($step in $steps)
     {
