@@ -341,19 +341,30 @@ class GenerateNewSecurityTokenStep : Step
 
 class ChangeAppJsonStep : Step
 {
-    ChangeAppJsonStep([object] $json): base("Changing app.json (merging with custom.json)", $json){}
-
-    [void] BackupJson([string] $targetJsonFile){
-        Copy-Item $targetJsonFile -Destination "$targetJsonFile.backup";
+    [string] $EnvironmentName
+    [string] $AppJsonPath
+    
+    ChangeAppJsonStep([object] $json, [string] $environmentName, [string] $appJsonPath): base("Changing app.json (merging with custom.json)", $json){
+        $this.EnvironmentName=$environmentName
+        $this.AppJsonPath=$appJsonPath
     }
-
+    
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
-        $site =  $this.GetValueOrLogError("site")
-        $targetJsonFile="c:\inetpub\wwwroot\tessa\app.json" #TODO
-        $mergeWithJsonFile1="C:\Dev\Scripts\config\dev-pushin.json" #TODO
-        $mergeWithJsonFile2="C:\Dev\Scripts\config\dev-pushin.web.json" #TODO
-        $this.BackupJson -targetJsonFile $targetJsonFile;
-        Merge-JsonFiles -TargetFile $targetJsonFile -FilesToMerge $targetJsonFile,$mergeWithJsonFile1,$mergeWithJsonFile2
+        $environmentJsonFile="$PSScriptRoot\config\$($this.EnvironmentName).json"
+        $environmentWebJsonFile="$PSScriptRoot\config\$($this.EnvironmentName).web.json"
+        $environmentWebChronosFile="$PSScriptRoot\config\$($this.EnvironmentName).chronos.json"
+        $filesToMerge=@()
+        $filesToMerge+=$this.AppJsonPath
+        $filesToMerge+=$environmentJsonFile
+        if ($ServerRoles.Contains([Role]::Web)){
+            $filesToMerge+=$environmentWebJsonFile
+        }   
+        if ($ServerRoles.Contains([Role]::Chronos)){
+            $filesToMerge+=$environmentWebChronosFile
+        }   
+    
+        Copy-Item $this.AppJsonPath -Destination "$($this.AppJsonPath).backup";
+        Merge-JsonFiles -TargetFile $this.AppJsonPath -FilesToMerge $filesToMerge
         Write-Host -ForegroundColor Gray "app.json changed (merged with custom.json)";
     }
 }
@@ -409,6 +420,7 @@ function Install-TessaPrerequisites
     $webRole = $json.roles.web
     $chronosRole = $json.roles.chronos
     $sqlRole = $json.roles.sql
+    $tessaFolderInIis=$webRole.iis.'tessa-folder'
 
     # Below are step numbers for Tessa 3.5.0 according to https://mytessa.ru/docs/InstallationGuide/InstallationGuide.html
     [Step[]]$steps = @()
@@ -424,7 +436,7 @@ function Install-TessaPrerequisites
     $steps += [RequireSslStep]::new($webRole.'iis')                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
     $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis')           # 3.4
-    $steps += [ChangeAppJsonStep]::new($webRole.'iis')                      # 3.5
+    $steps += [ChangeAppJsonStep]::new($webRole.'iis',"dev-pushin","$tessaFolderInIis\app.json")  # 3.5
 
 
     foreach ($step in $steps)

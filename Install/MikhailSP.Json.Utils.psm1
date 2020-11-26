@@ -103,7 +103,12 @@ function Merge-JsonFiles(){
     )
     $targetJson=@{}
     foreach($fileToMerge in $FilesToMerge){
-        $jsonToMerge=Get-Content -Path $fileToMerge -Raw | ConvertFrom-Json
+        if (!(Test-Path -Path $fileToMerge))
+        {
+            Write-Verbose "File to merge '$fileToMerge' not found"
+            continue
+        }
+        $jsonToMerge = Get-Content -Path $fileToMerge -Raw | ConvertFrom-Json
         Merge-Jsons -Target $targetJson -Source $jsonToMerge
     }
     $targetStr=$targetJson | ConvertTo-Json -Depth 5 | Format-Json
