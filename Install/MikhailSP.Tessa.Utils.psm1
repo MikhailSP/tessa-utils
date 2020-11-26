@@ -371,6 +371,21 @@ class ChangeAppJsonStep : Step
 }
 
 
+class CopyChronosStep : Step
+{
+    [string] $TessaDistribPath
+    
+    EnableWinAuthStep([object] $json, [string] $tessaDistribPath): base("Copying Chronos to folder", $json, [Role]::Chronos){
+        $this.TesasDistribPath=tessaDistribPath
+    }
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $chronosFolder =  $this.GetValueOrLogError("folder")
+        Copy-Item -Path "$($this.TesasDistribPath)\Chronos" -Destination $$chronosFolder -Recurse;
+        Write-Host -ForegroundColor Gray "Chronos was copied to folder";
+    }
+}
+
 function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
 {
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -426,6 +441,7 @@ function Install-TessaPrerequisites
     $chronosRole = $json.roles.chronos
     $sqlRole = $json.roles.sql
     $tessaFolderInIis=$webRole.iis.'tessa-folder'
+    $tessaDistribPath=$commonRole.'tessa-distrib'
 
     # Below are step numbers for Tessa 3.5.0 according to https://mytessa.ru/docs/InstallationGuide/InstallationGuide.html
     [Step[]]$steps = @()
@@ -442,6 +458,7 @@ function Install-TessaPrerequisites
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
     $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis')           # 3.4
     $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")  # 3.5
+    $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath)  # 3.6
 
 
     foreach ($step in $steps)
