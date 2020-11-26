@@ -333,18 +333,19 @@ function Install-TessaPrerequisites
     $chronosRole = $json.roles.chronos
     $sqlRole = $json.roles.sql
 
+    # Below are step numbers for Tessa 3.5.0 according to https://mytessa.ru/docs/InstallationGuide/InstallationGuide.html
     [Step[]]$steps = @()
-    $steps += [NewKeyboardLayoutStep]::new($commonRole.'keyboard-layout')
+    $steps += [NewKeyboardLayoutStep]::new($commonRole.'keyboard-layout') 
     $steps += [SetTimeZoneStep]::new($commonRole.'timezone')
-    $steps += [InstallIisStep]::new($webRole.'iis')
-    $steps += [NewSslCertificateStep]::new($webRole.'iis')
-    $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime')
-    $steps += [AddUserToIusrsStep]::new($webRole.'iis')
-    $steps += [CreateAppPool]::new($webRole.'iis')
-    $steps += [CopyTessaWebStep]::new($webRole.'iis')
-    $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')
-    $steps += [RequireSslStep]::new($webRole.'iis')
-    $steps += [EnableWinAuthStep]::new($webRole.'iis')
+    $steps += [InstallIisStep]::new($webRole.'iis')                         # 3.1
+    $steps += [NewSslCertificateStep]::new($webRole.'iis')                  # 3.1
+    $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime') # 3.1
+    $steps += [AddUserToIusrsStep]::new($webRole.'iis')                     # 3.2
+    $steps += [CreateAppPool]::new($webRole.'iis')                          # 3.3.1
+    $steps += [CopyTessaWebStep]::new($webRole.'iis')                       # 3.3.4
+    $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')      # 3.3.5
+    $steps += [RequireSslStep]::new($webRole.'iis')                         # 3.3.6
+    $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
 
 
     foreach ($step in $steps)
