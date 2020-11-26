@@ -175,7 +175,11 @@ class NewSslCertificateStep : Step {
 
 class InstallCoreHostingRuntimeStep: Step
 {
-    InstallCoreHostingRuntimeStep([object]$json): base("Installing .NET Core Runtime & Windows Hosting Bundle", $json, @([Role]::Web)){}
+    [string] $TempFolder
+    
+    InstallCoreHostingRuntimeStep([object]$json, [string] $tempFolder): base("Installing .NET Core Runtime & Windows Hosting Bundle", $json, @([Role]::Web)){
+        $this.TempFolder=$tempFolder
+    }
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         switch($TessaVersion)
@@ -185,16 +189,15 @@ class InstallCoreHostingRuntimeStep: Step
                 #
                 # Reference: https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/?view=aspnetcore-3.1
                 #
-                $tempFolder="c:\temp\" #TODO get from prerequisites.json roles.common.paths.temp
                 $whbUrl=$this.GetValueOrLogError("url")
-                Write-Verbose "Downloading installer from '$whbUrl' to '$tempFolder'"
+                Write-Verbose "Downloading installer from '$whbUrl' to '$($this.TempFolder)'"
 
-                if( ![System.IO.Directory]::Exists( $tempFolder ) )
+                if( ![System.IO.Directory]::Exists( $this.TempFolder ) )
                 {
-                    New-Item -ItemType Directory -Force -Path $tempFolder
+                    New-Item -ItemType Directory -Force -Path $this.TempFolder
                 }
                 
-                $whbInstallerFile = $tempFolder + [System.IO.Path]::GetFileName( $whbUrl )
+                $whbInstallerFile = $this.TempFolder + [System.IO.Path]::GetFileName( $whbUrl )
 
                 Invoke-WebRequest -Uri $whbUrl -OutFile $whbInstallerFile
                 Write-Host "Windows Hosting Bundle Installer downloaded. Installing..."
@@ -447,6 +450,7 @@ function Install-TessaPrerequisites
     $webRole = $json.roles.web
     $chronosRole = $json.roles.chronos
     $sqlRole = $json.roles.sql
+    $tempFolder=$commonRole.paths.temp
     $tessaFolderInIis=$webRole.iis.'tessa-folder'
     $tessaDistribPath=$commonRole.'tessa-distrib'
     $licenseFile=$commonRole.paths.license
@@ -455,18 +459,18 @@ function Install-TessaPrerequisites
     [Step[]]$steps = @()
     $steps += [NewKeyboardLayoutStep]::new($commonRole.'keyboard-layout') 
     $steps += [SetTimeZoneStep]::new($commonRole.'timezone')
-    $steps += [InstallIisStep]::new($webRole.'iis')                         # 3.1
-    $steps += [NewSslCertificateStep]::new($webRole.'iis')                  # 3.1
-    $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime') # 3.1
-    $steps += [AddUserToIusrsStep]::new($webRole.'iis')                     # 3.2
-    $steps += [CreateAppPool]::new($webRole.'iis')                          # 3.3.1
-    $steps += [CopyTessaWebStep]::new($webRole.'iis',$tessaDistribPath,$licenseFile)                    # 3.3.4
-    $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')      # 3.3.5
-    $steps += [RequireSslStep]::new($webRole.'iis')                         # 3.3.6
-    $steps += [EnableWinAuthStep]::new($webRole.'iis')                      # 3.3.7
+    $steps += [InstallIisStep]::new($webRole.'iis')                                         # 3.1
+    $steps += [NewSslCertificateStep]::new($webRole.'iis')                                  # 3.1
+    $steps += [InstallCoreHostingRuntimeStep]::new($webRole.'core-runtime',$tempFolder)     # 3.1
+    $steps += [AddUserToIusrsStep]::new($webRole.'iis')                                     # 3.2
+    $steps += [CreateAppPool]::new($webRole.'iis')                                          # 3.3.1
+    $steps += [CopyTessaWebStep]::new($webRole.'iis',$tessaDistribPath,$licenseFile)        # 3.3.4
+    $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')                      # 3.3.5
+    $steps += [RequireSslStep]::new($webRole.'iis')                                         # 3.3.6
+    $steps += [EnableWinAuthStep]::new($webRole.'iis')                                      # 3.3.7
     $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                     # 3.4
     $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")    # 3.5
-    $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath)  # 3.6
+    $steps += [CopyChronosStep]::new($webRole.'chronos',$tessaDistribPath)                              # 3.6
 
 
     foreach ($step in $steps)
