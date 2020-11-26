@@ -361,7 +361,8 @@ class ChangeAppJsonStep : Step
         }   
         if ($ServerRoles.Contains([Role]::Chronos)){
             $filesToMerge+=$environmentWebChronosFile
-        }   
+        }
+        Write-Verbose "Files '$filesToMerge' will be merged into '$($this.AppJsonPath)'"
     
         Copy-Item $this.AppJsonPath -Destination "$($this.AppJsonPath).backup";
         Merge-JsonFiles -TargetFile $this.AppJsonPath -FilesToMerge $filesToMerge
