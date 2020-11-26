@@ -387,13 +387,13 @@ class CopyChronosStep : Step
     [string] $LicenseFile
 
     CopyChronosStep([object] $json, [string] $tessaDistribPath,[string] $licenseFile): base("Copying Chronos to folder", $json, [Role]::Chronos){
-        $this.TesasDistribPath=tessaDistribPath
+        $this.TessaDistribPath=$tessaDistribPath
         $this.LicenseFile=$licenseFile
     }
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $chronosFolder =  $this.GetValueOrLogError("folder")
-        Copy-Item -Path "$($this.TesasDistribPath)\Chronos" -Destination $chronosFolder -Recurse;
+        Copy-Item -Path "$($this.TessaDistribPath)\Chronos" -Destination $chronosFolder -Recurse;
         Copy-Item -Path $this.LicenseFile -Destination $chronosFolder -Recurse;
         Write-Host -ForegroundColor Gray "Chronos was copied to folder";
     }
@@ -419,7 +419,7 @@ class InstallSqlStep : Step
         $iniFile =  $this.GetValueOrLogError("ini-file")
         $admin =  $this.GetValueOrLogError("admin")
         $admin2 =  $this.GetValueOrLogError("admin2")
-        $sqlSetupPath=-join("$SqlDistribDriveLetter",":/setup.exe");
+        $sqlSetupPath="$($global:SqlDistribDriveLetter):/setup.exe"
         $arguments="/ConfigurationFile=$iniFile /IACCEPTSQLSERVERLICENSETERMS /SQLSYSADMINACCOUNTS=""BUILTIN\Administrators"" ""$admin"" ""$admin2""";
         Write-Host -ForegroundColor Gray "Запуск '$sqlSetupPath' с параметрами '$arguments'"
         Start-Process -FilePath $sqlSetupPath -ArgumentList $arguments -Wait
@@ -472,7 +472,7 @@ class DownloadAndInstallStep : Step
     [string] $SoftName
     
     DownloadAndInstallStep([object] $json, [string] $tempFolder, [string] $softName): base("Downloading and installing $softName", $json){
-        $this.TempFoldet=$tempFolder
+        $this.TempFolder=$tempFolder
         $this.SoftName=$softName
     }
 
@@ -565,7 +565,7 @@ function Install-TessaPrerequisites
     $sqlRole = $json.roles.sql
     $tempFolder=$commonRole.paths.temp
     $tessaFolderInIis=$webRole.iis.'tessa-folder'
-    $tessaDistribPath=$commonRole.'tessa-distrib'
+    $tessaDistribPath=$commonRole.paths.'tessa-distrib'
     $licenseFile=$commonRole.paths.license
     $soft=$commonRole.soft
 
