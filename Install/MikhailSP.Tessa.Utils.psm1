@@ -446,7 +446,7 @@ class InstallSsmsStep : Step
             Write-Verbose "SQL Server Management Studio Installer already downloaded"
         }
         else {
-            Invoke-WebRequest -Uri $SqlManagementStudioUrl  -OutFile $ssmsInstaller
+#            Invoke-WebRequest -Uri $SqlManagementStudioUrl  -OutFile $ssmsInstaller
             Write-Host "SQL Server Management Studio Installer downloaded"
         } 
 
@@ -577,17 +577,18 @@ class InstallChronosStep : Step
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         Write-Host -ForegroundColor Gray "Installing Chronos $TessaVersion (using install-and-start.bat)";
         $chronosFolder =  $this.GetValueOrLogError("folder")
-        $tessaChronosSetupFile="$chronosFolder\Chronos\install-and-start.bat"
-        Execute-CommandWithExceptionOnErrorCode -Command $tessaChronosSetupFile
+        $tessaChronosSetupFile="$chronosFolder\install-and-start.bat"
+        Start-Process -FilePath $tessaChronosSetupFile -Wait
     
         $chonosServiceName="chronos"
         if (Get-Service $chonosServiceName -ErrorAction SilentlyContinue){
             Write-Host -ForegroundColor Gray "Chronos installed"
         } else {
             throw "Choronos service '$chonosServiceName' was not found"
-        }     
+        }
     }
 }
+
 
 
 class StartTessaAdminStep : Step
