@@ -556,7 +556,7 @@ class CheckTessaWebServicesStep : Step
     
         $url="http://localhost/tessa/web/check"
         $Response = Invoke-WebRequest -URI $url
-        if ($Response.Content.Contains("Error") || !$Response.Content.Contains("ok")){
+        if ($Response.Content.Contains("Error") -or !$Response.Content.Contains("ok")){
             Invoke-Expression "cmd.exe /C start $url"    
             throw "Error checking Tessa web service on $url"
         }   
