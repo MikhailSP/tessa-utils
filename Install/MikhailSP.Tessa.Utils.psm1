@@ -513,17 +513,17 @@ class InstallTessaDefaultConfigurationStep : Step
     [string] $TessaDistrib
 
     InstallTessaDefaultConfigurationStep([object] $json,[string] $tessaDistrib): base("Installing Tessa default configuration", $json, @([Role]::Web)){
-        $this.TessaDistrib=$tessaDistrib
+    $this.TessaDistrib=$tessaDistrib
     }
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
-        $tessaSetupFile="$($this.TessaDistrib)\Setup.bat";
-        Execute-CommandWithExceptionOnErrorCode -CommandPath $tessaSetupFile -ArgumentList "/passive" -Wait
-    
-        Write-Host -ForegroundColor Gray "Restarting IIS";
-        Execute-CommandWithExceptionOnErrorCode -CommandPath "iisreset"
+    $tessaSetupFile="$($this.TessaDistrib)\Setup.bat";
+    Start-Process -FilePath $tessaSetupFile -ArgumentList "/passive" -Wait
 
-        Write-Host -ForegroundColor Gray "Tessa default configuration installed";
+    Write-Host -ForegroundColor Gray "Restarting IIS";
+    Execute-CommandWithExceptionOnErrorCode -CommandPath "iisreset"
+
+    Write-Host -ForegroundColor Gray "Tessa default configuration installed";
     }
 }
 
