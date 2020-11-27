@@ -511,8 +511,8 @@ class EnablePsRemotingStep : Step
 class InstallTessaDefaultConfigurationStep : Step
 {
     [string] $TessaDistrib
-    
-    AttachSqlIsoStep([object] $json,[string] $tessaDistrib): base("Installing Tessa default configuration", $json, [Role]::Sql){
+
+    InstallTessaDefaultConfigurationStep([object] $json,[string] $tessaDistrib): base("Installing Tessa default configuration", $json, [Role]::Sql){
         $this.TessaDistrib=$tessaDistrib
     }
 
