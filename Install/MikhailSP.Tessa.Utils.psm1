@@ -508,9 +508,34 @@ class EnablePsRemotingStep : Step
     }
 }
 
-
-function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
+class InstallTessaDefaultConfigurationStep : Step
 {
+    [string] $TessaDistrib
+    
+    AttachSqlIsoStep([object] $json,[string] $tessaDistrib): base("Installing Tessa default configuration", $json, [Role]::Sql){
+        $this.TessaDistrib=$tessaDistrib
+    }
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        $isoPath =  $this.GetValueOrLogError("iso-path")
+        $tessaSetupFile="$($this.TessaDistrib)\Setup.bat";
+        Execute-CommandWithExceptionOnErrorCode -CommandPath $tessaSetupFile -ArgumentList "/passive" -Wait
+    
+        Write-Host -ForegroundColor Gray "Restarting IIS";
+        Execute-CommandWithExceptionOnErrorCode -CommandPath "iisreset"
+
+        Write-Host -ForegroundColor Gray "Tessa default configuration installed";
+    }
+}
+
+
+function Execute-Command
+{
+    [CmdletBinding()]
+    param(
+        [string]$CommandPath, 
+        [string[]]$CommandArguments
+    )
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
     $pinfo.FileName = $CommandPath
     $pinfo.RedirectStandardError = $true
@@ -528,12 +553,25 @@ function Execute-Command([string]$CommandPath, [string[]]$CommandArguments)
     $p.WaitForExit()
 }
 
-function Execute-CommandWithExceptionOnErrorCode ([string]$CommandPath, [string[]]$CommandArguments){
+function Execute-CommandWithExceptionOnErrorCode{
+    [CmdletBinding()]
+    param(
+        [string]$CommandPath, 
+        [string[]]$CommandArguments
+    )
     $result=Execute-Command -CommandPath $CommandPath -CommandArguments $CommandArguments
     if ($result.exitCode -ne 0){
         throw "Calling '$CommandPath' with arguments '$CommandArguments' returned exit code $($result.exitCode). Stderr: '$($result.stderr)'. Stdout: '$($result.stdout)'"
     }
     $result
+}
+
+function Execute-Tadmin{
+    [CmdletBinding()]
+    param(
+        [string[]] $Arguments
+    )
+    Execute-CommandWithExceptionOnErrorCode -CommandPath $global:tadmin -CommandArguments $Arguments
 }
 
 function Install-TessaPrerequisites
@@ -566,6 +604,7 @@ function Install-TessaPrerequisites
     $tempFolder=$commonRole.paths.temp
     $tessaFolderInIis=$webRole.iis.'tessa-folder'
     $tessaDistribPath=$commonRole.paths.'tessa-distrib'
+    $global:tadmin="$tessaDistribPath\Tools\tadmin.exe"
     $licenseFile=$commonRole.paths.license
     $soft=$commonRole.soft
 
@@ -592,8 +631,10 @@ function Install-TessaPrerequisites
     $steps += [DetachSqlIsoStep]::new($sqlRole)                                      
     $steps += [DownloadAndInstallStep]::new($soft.'notepad-pp',$tempFolder,"Notepad++")                                      
     $steps += [DownloadAndInstallStep]::new($soft.'totalcmd',$tempFolder,"Total Commander")                                      
-    $steps += [EnablePsRemotingStep]::new($commonRole.'psremoting')                                      
-
+    $steps += [EnablePsRemotingStep]::new($commonRole.'psremoting')
+    $steps += [ChangeAppJsonStep]::new($webRole,$EnvironmentName,"$tessaDistribPath\Tools\app.json")    # 3.7
+    $steps += [InstallTessaDefaultConfigurationStep]::new($webRole,$tessaDistribPath)                   # 3.7
+    
     foreach ($step in $steps)
     {
         $step.DoAndLogStep($ServerRoles, $TessaVersion)
