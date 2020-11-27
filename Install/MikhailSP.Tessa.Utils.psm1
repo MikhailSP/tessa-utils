@@ -337,7 +337,7 @@ class GenerateNewSecurityTokenStep : Step
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $tessaFolderInIis =  $this.GetValueOrLogError("tessa-folder")
         $tessaPoolName =  $this.GetValueOrLogError("pool-name")
-        $tadminFile=Join-Path -Path $this.TessaDistribPath -Child "Tools\tadmin"
+        $tadminFile=Join-Path -Path $this.TessaDistribPath -Child "Tools\tadmin.exe"
         Write-Verbose "Prepare for running tadmin from '$tadminFile' for Tessa IIS Path '$tessaFolderInIis'"
 
         $this.UpdateToken("Signature", $tadminFile, $tessaFolderInIis)
