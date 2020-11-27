@@ -213,7 +213,7 @@ class InstallCoreHostingRuntimeStep: Step
 
 class AddUserToIusrsStep : Step
 {
-    AddUserToIusrsStep([object] $json): base("Adding tessa pool account to IIS_IUSRS group", $json){}
+    AddUserToIusrsStep([object] $json): base("Adding tessa pool account to IIS_IUSRS group", $json, @([Role]::Web)){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $poolAccount =  $this.GetValueOrLogError("pool-account")
@@ -228,7 +228,7 @@ class AddUserToIusrsStep : Step
 
 class CreateAppPool : Step
 {
-    CreateAppPool([object] $json): base("Creating tessa application pool", $json){}
+    CreateAppPool([object] $json): base("Creating tessa application pool", $json,[Role]::Web){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $poolName =  $this.GetValueOrLogError("pool-name")
@@ -262,7 +262,7 @@ class CopyTessaWebStep : Step
     [string] $TessaDistribPath
     [string] $LicenseFile
 
-    CopyTessaWebStep([object] $json, [string] $tessaDistribPath, [string] $licenseFile): base("Copying tessa web files to IIS folder", $json){
+    CopyTessaWebStep([object] $json, [string] $tessaDistribPath, [string] $licenseFile): base("Copying tessa web files to IIS folder", $json, @([Role]::Web)){
         $this.TessaDistribPath=$tessaDistribPath
         $this.LicenseFile=$licenseFile
     }
@@ -286,7 +286,7 @@ class CopyTessaWebStep : Step
 
 class ConvertFolderToWebApplicationStep : Step
 {
-    ConvertFolderToWebApplicationStep([object] $json): base("Converting Tessa folder in IIS to a Web Application", $json){}
+    ConvertFolderToWebApplicationStep([object] $json): base("Converting Tessa folder in IIS to a Web Application", $json, @([Role]::Web)){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $site =  $this.GetValueOrLogError("site")
@@ -298,7 +298,7 @@ class ConvertFolderToWebApplicationStep : Step
 
 class RequireSslStep : Step
 {
-    RequireSslStep([object] $json): base("Require SSL for Tessa", $json){}
+    RequireSslStep([object] $json): base("Require SSL for Tessa", $json,[Role]::Web){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $site =  $this.GetValueOrLogError("site")
@@ -309,7 +309,7 @@ class RequireSslStep : Step
 
 class EnableWinAuthStep : Step
 {
-    EnableWinAuthStep([object] $json): base("Enabling windows authentication for Tessa", $json){}
+    EnableWinAuthStep([object] $json): base("Enabling windows authentication for Tessa", $json, @([Role]::Web)){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $site =  $this.GetValueOrLogError("site")
@@ -322,7 +322,7 @@ class GenerateNewSecurityTokenStep : Step
 {
     [string] $TessaDistribPath
     
-    GenerateNewSecurityTokenStep([object] $json, [string] $tessaDistribPath): base("Generating new security tokens (Signature and Cipher) for Tessa web services", $json){
+    GenerateNewSecurityTokenStep([object] $json, [string] $tessaDistribPath): base("Generating new security tokens (Signature and Cipher) for Tessa web services", $json, @([Role]::Web)){
         $this.TessaDistribPath=$tessaDistribPath
     }
 
@@ -386,7 +386,7 @@ class CopyChronosStep : Step
     [string] $TessaDistribPath
     [string] $LicenseFile
 
-    CopyChronosStep([object] $json, [string] $tessaDistribPath,[string] $licenseFile): base("Copying Chronos to folder", $json, [Role]::Chronos){
+    CopyChronosStep([object] $json, [string] $tessaDistribPath,[string] $licenseFile): base("Copying Chronos to folder", $json, @([Role]::Chronos)){
         $this.TessaDistribPath=$tessaDistribPath
         $this.LicenseFile=$licenseFile
     }
@@ -413,7 +413,7 @@ class AttachSqlIsoStep : Step
 
 class InstallSqlStep : Step
 {
-    InstallSqlStep([object] $json): base("Installing MS SQL Server", $json, [Role]::Sql){}
+    InstallSqlStep([object] $json): base("Installing MS SQL Server", $json, @([Role]::Sql)){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $iniFile =  $this.GetValueOrLogError("ini-file")
@@ -431,7 +431,7 @@ class InstallSsmsStep : Step
 {
     [string] $TempFolder
     
-    InstallSsmsStep([object] $json, [string] $tempFolder): base("Installing MS SQL Server Management Studio", $json, [Role]::Sql){
+    InstallSsmsStep([object] $json, [string] $tempFolder): base("Installing MS SQL Server Management Studio", $json, @([Role]::Sql)){
         $this.TempFolder=$tempFolder
     }
 
@@ -457,7 +457,7 @@ class InstallSsmsStep : Step
 
 class DetachSqlIsoStep : Step
 {
-    DetachSqlIsoStep([object] $json): base("Detaching SQL ISO file", $json, [Role]::Sql){}
+    DetachSqlIsoStep([object] $json): base("Detaching SQL ISO file", $json, @([Role]::Sql)){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         $isoPath =  $this.GetValueOrLogError("iso-path")
@@ -500,7 +500,7 @@ class DownloadAndInstallStep : Step
 
 class EnablePsRemotingStep : Step
 {
-    EnablePsRemotingStep([object] $json): base("Enabling PowerShell remoting", $json, [Role]::Sql){}
+    EnablePsRemotingStep([object] $json): base("Enabling PowerShell remoting", $json){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         Enable-PSRemoting -Force;
@@ -512,7 +512,7 @@ class InstallTessaDefaultConfigurationStep : Step
 {
     [string] $TessaDistrib
 
-    InstallTessaDefaultConfigurationStep([object] $json,[string] $tessaDistrib): base("Installing Tessa default configuration", $json, [Role]::Web){
+    InstallTessaDefaultConfigurationStep([object] $json,[string] $tessaDistrib): base("Installing Tessa default configuration", $json, @([Role]::Web)){
         $this.TessaDistrib=$tessaDistrib
     }
 
@@ -530,7 +530,7 @@ class InstallTessaDefaultConfigurationStep : Step
 
 class CheckTessaWebServicesStep : Step
 {
-    CheckTessaWebServicesStep([object] $json): base("Checking Tessa Web Services working", $json, [Role]::Web){}
+    CheckTessaWebServicesStep([object] $json): base("Checking Tessa Web Services working", $json, @([Role]::Web)){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         #Ignore self-signed certificates error
@@ -569,7 +569,7 @@ class CheckTessaWebServicesStep : Step
 
 class InstallChronosStep : Step
 {
-    InstallChronosStep([object] $json): base("Installing Chronos", $json, [Role]::Sql){}
+    InstallChronosStep([object] $json): base("Installing Chronos", $json, @([Role]::Chronos)){}
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         Write-Host -ForegroundColor Gray "Installing Chronos $TessaVersion (using install-and-start.bat)";
@@ -585,6 +585,36 @@ class InstallChronosStep : Step
         }     
     }
 }
+
+
+class StartTessaAdminStep : Step
+{
+    [string] $TessaDistrib
+
+    StartTessaAdminStep([object] $json,[string] $tessaDistrib): base("Starting TessaAdmin", $json, @([Role]::Web)){
+        $this.TessaDistrib=$tessaDistrib
+    }
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        Start-Process -FilePath "$($this.TessaDistrib)\Applications\TessaAdmin\TessaAdmin.exe" -ArgumentList "/u:admin /p:admin"
+        Write-Host -ForegroundColor Gray "TessaAdmin started"
+    }
+}
+
+class StartTessaClientStep : Step
+{
+    [string] $TessaDistrib
+
+    StartTessaClientStep([object] $json,[string] $tessaDistrib): base("Starting TessaClient", $json, @([Role]::Web)){
+        $this.TessaDistrib=$tessaDistrib
+    }
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        Start-Process -FilePath "$($this.TessaDistrib)\Applications\TessaClient\TessaClient.exe" -ArgumentList "/u:admin /p:admin"
+        Write-Host -ForegroundColor Gray "TessaClient started"
+    }
+}
+
 
 function Execute-Command
 {
@@ -692,7 +722,9 @@ function Install-TessaPrerequisites
     $steps += [ChangeAppJsonStep]::new($webRole,$EnvironmentName,"$tessaDistribPath\Tools\app.json")    # 3.7
     $steps += [InstallTessaDefaultConfigurationStep]::new($webRole,$tessaDistribPath)                   # 3.7
     $steps += [CheckTessaWebServicesStep]::new($webRole)                                                # 3.8
-    $steps += [InstallChronosStep]::new($webRole)                                                       # 3.9
+    $steps += [InstallChronosStep]::new($chronosRole)                                                   # 3.9
+    $steps += [StartTessaAdminStep]::new($webRole,$tessaDistribPath)                                    # 3.10
+    $steps += [StartTessaClientStep]::new($webRole,$tessaDistribPath)                                   # 3.10
     
     foreach ($step in $steps)
     {
