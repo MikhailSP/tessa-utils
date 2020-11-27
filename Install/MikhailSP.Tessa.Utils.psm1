@@ -512,7 +512,7 @@ class InstallTessaDefaultConfigurationStep : Step
 {
     [string] $TessaDistrib
 
-    InstallTessaDefaultConfigurationStep([object] $json,[string] $tessaDistrib): base("Installing Tessa default configuration", $json, [Role]::Sql){
+    InstallTessaDefaultConfigurationStep([object] $json,[string] $tessaDistrib): base("Installing Tessa default configuration", $json, [Role]::Web){
         $this.TessaDistrib=$tessaDistrib
     }
 
@@ -525,6 +525,44 @@ class InstallTessaDefaultConfigurationStep : Step
         Execute-CommandWithExceptionOnErrorCode -CommandPath "iisreset"
 
         Write-Host -ForegroundColor Gray "Tessa default configuration installed";
+    }
+}
+
+class CheckTessaWebServicesStep : Step
+{
+    CheckTessaWebServicesStep([object] $json): base("Checking Tessa Web Services working", $json, [Role]::Web){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        #Ignore self-signed certificates error
+        if (-not("dummy" -as [type])) {
+            add-type -TypeDefinition @"
+                using System;
+                using System.Net;
+                using System.Net.Security;
+                using System.Security.Cryptography.X509Certificates;
+                
+                public static class Dummy {
+                    public static bool ReturnTrue(object sender,
+                        X509Certificate certificate,
+                        X509Chain chain,
+                        SslPolicyErrors sslPolicyErrors) { return true; }
+                
+                    public static RemoteCertificateValidationCallback GetDelegate() {
+                        return new RemoteCertificateValidationCallback(Dummy.ReturnTrue);
+                    }
+                }
+"@
+        }
+        [System.Net.ServicePointManager]::ServerCertificateValidationCallback = [dummy]::GetDelegate()
+    
+        $url="http://localhost/tessa/web/check"
+        $Response = Invoke-WebRequest -URI $url
+        if ($Response.Content.Contains("Error") || !$Response.Content.Contains("ok")){
+            Invoke-Expression "cmd.exe /C start $url"    
+            throw "Error checking Tessa web service on $url"
+        }   
+    
+        Write-Host -ForegroundColor Gray "Tessa Web Services work correctly";
     }
 }
 
@@ -634,6 +672,7 @@ function Install-TessaPrerequisites
     $steps += [EnablePsRemotingStep]::new($commonRole.'psremoting')
     $steps += [ChangeAppJsonStep]::new($webRole,$EnvironmentName,"$tessaDistribPath\Tools\app.json")    # 3.7
     $steps += [InstallTessaDefaultConfigurationStep]::new($webRole,$tessaDistribPath)                   # 3.7
+    $steps += [CheckTessaWebServicesStep]::new($webRole)                                                # 3.8
     
     foreach ($step in $steps)
     {
