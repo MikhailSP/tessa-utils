@@ -567,6 +567,25 @@ class CheckTessaWebServicesStep : Step
 }
 
 
+class InstallChronosStep : Step
+{
+    InstallChronosStep([object] $json): base("Installing Chronos", $json, [Role]::Sql){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        Write-Host -ForegroundColor Gray "Installing Chronos $TessaVersion (using install-and-start.bat)";
+        $chronosFolder =  $this.GetValueOrLogError("folder")
+        $tessaChronosSetupFile="$chronosFolder\Chronos\install-and-start.bat"
+        Execute-CommandWithExceptionOnErrorCode -Command $tessaChronosSetupFile
+    
+        $chonosServiceName="chronos"
+        if (Get-Service $serviceName -ErrorAction SilentlyContinue){
+            Write-Host -ForegroundColor Gray "Chronos installed"
+        } else {
+            throw "Choronos service '$chronos' was not found"
+        }     
+    }
+}
+
 function Execute-Command
 {
     [CmdletBinding()]
@@ -673,6 +692,7 @@ function Install-TessaPrerequisites
     $steps += [ChangeAppJsonStep]::new($webRole,$EnvironmentName,"$tessaDistribPath\Tools\app.json")    # 3.7
     $steps += [InstallTessaDefaultConfigurationStep]::new($webRole,$tessaDistribPath)                   # 3.7
     $steps += [CheckTessaWebServicesStep]::new($webRole)                                                # 3.8
+    $steps += [InstallChronosStep]::new($webRole)                                                       # 3.9
     
     foreach ($step in $steps)
     {
