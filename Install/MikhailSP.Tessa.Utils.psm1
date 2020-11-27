@@ -534,32 +534,36 @@ class CheckTessaWebServicesStep : Step
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
         #Ignore self-signed certificates error
         if (-not("dummy" -as [type])) {
-            add-type -TypeDefinition @"
-                using System;
-                using System.Net;
-                using System.Net.Security;
-                using System.Security.Cryptography.X509Certificates;
-                
-                public static class Dummy {
-                    public static bool ReturnTrue(object sender,
-                        X509Certificate certificate,
-                        X509Chain chain,
-                        SslPolicyErrors sslPolicyErrors) { return true; }
-                
-                    public static RemoteCertificateValidationCallback GetDelegate() {
-                        return new RemoteCertificateValidationCallback(Dummy.ReturnTrue);
+        add-type -TypeDefinition @"
+                    using System;
+                    using System.Net;
+                    using System.Net.Security;
+                    using System.Security.Cryptography.X509Certificates;
+                    
+                    public static class Dummy {
+                        public static bool ReturnTrue(object sender,
+                            X509Certificate certificate,
+                            X509Chain chain,
+                            SslPolicyErrors sslPolicyErrors) { return true; }
+                    
+                        public static RemoteCertificateValidationCallback GetDelegate() {
+                            return new RemoteCertificateValidationCallback(Dummy.ReturnTrue);
+                        }
+    
+                        static Dummy(){
+                            System.Net.ServicePointManager.ServerCertificateValidationCallback=GetDelegate();
+                        }
                     }
-                }
 "@
         }
-        [System.Net.ServicePointManager]::ServerCertificateValidationCallback = [dummy]::GetDelegate()
+        #      [System.Net.ServicePointManager]::ServerCertificateValidationCallback = [dummy]::GetDelegate()
     
         $url="http://localhost/tessa/web/check"
         $Response = Invoke-WebRequest -URI $url
         if ($Response.Content.Contains("Error") -or !$Response.Content.Contains("ok")){
-            Invoke-Expression "cmd.exe /C start $url"    
+            Invoke-Expression "cmd.exe /C start $url"
             throw "Error checking Tessa web service on $url"
-        }   
+        }
     
         Write-Host -ForegroundColor Gray "Tessa Web Services work correctly";
     }
