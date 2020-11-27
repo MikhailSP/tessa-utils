@@ -517,7 +517,6 @@ class InstallTessaDefaultConfigurationStep : Step
     }
 
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
-        $isoPath =  $this.GetValueOrLogError("iso-path")
         $tessaSetupFile="$($this.TessaDistrib)\Setup.bat";
         Execute-CommandWithExceptionOnErrorCode -CommandPath $tessaSetupFile -ArgumentList "/passive" -Wait
     
