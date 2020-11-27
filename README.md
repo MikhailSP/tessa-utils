@@ -20,5 +20,6 @@
 - Поправить в Copy-TessaInstaller.ps1 переменные $tessaVersion и $remotePath (путь к папке с дистрибутивом из предыдущего пункта);
 - Запустить в PowerShell Copy-TessaInstaller.ps1. Скрипт скопирует дистрибутивы в локальную папку c:\Dev и запустит под админом PowerShell ISE с Install-Tessa.ps1.  
 - Исправить настройки в config\prereq\prerequisites.json;
+- При необходимости поправить параметры запуска Install-TessaPrerequisites в 
     
 
