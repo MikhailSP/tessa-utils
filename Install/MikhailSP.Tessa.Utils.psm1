@@ -581,7 +581,7 @@ class InstallChronosStep : Step
         if (Get-Service $chonosServiceName -ErrorAction SilentlyContinue){
             Write-Host -ForegroundColor Gray "Chronos installed"
         } else {
-            throw "Choronos service '$chronos' was not found"
+            throw "Choronos service '$chonosServiceName' was not found"
         }     
     }
 }
