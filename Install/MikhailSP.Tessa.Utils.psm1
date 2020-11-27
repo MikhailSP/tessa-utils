@@ -578,7 +578,7 @@ class InstallChronosStep : Step
         Execute-CommandWithExceptionOnErrorCode -Command $tessaChronosSetupFile
     
         $chonosServiceName="chronos"
-        if (Get-Service $serviceName -ErrorAction SilentlyContinue){
+        if (Get-Service $chonosServiceName -ErrorAction SilentlyContinue){
             Write-Host -ForegroundColor Gray "Chronos installed"
         } else {
             throw "Choronos service '$chronos' was not found"
