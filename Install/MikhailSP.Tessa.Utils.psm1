@@ -446,7 +446,8 @@ class InstallSsmsStep : Step
             Write-Verbose "SQL Server Management Studio Installer already downloaded"
         }
         else {
-#            Invoke-WebRequest -Uri $SqlManagementStudioUrl  -OutFile $ssmsInstaller
+            $sqlManagementStudioUrl="https://aka.ms/ssmsfullsetup"
+            Invoke-WebRequest -Uri $sqlManagementStudioUrl  -OutFile $ssmsInstaller
             Write-Host "SQL Server Management Studio Installer downloaded"
         } 
 
