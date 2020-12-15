@@ -672,10 +672,10 @@ function Execute-Tadmin{
     Execute-CommandWithExceptionOnErrorCode -CommandPath $global:tadmin -CommandArguments $Arguments
 }
 
-function Install-TessaPrerequisites
+function Install-Tessa
 {
     <#
-        Установить пререквизиты (вещи, обязательные для установки Tessa, например, IIS для сервера приложений)
+        Установить Тессу (в т.ч. вещи, обязательные для установки Tessa, например, IIS для сервера приложений)
         .PARAMETER ServerRoles Роли сервера
         .PARAMETER TessaVersion Версия Тессы, пререквизиты к которой надо поставить
         .PARAMETER EnvironmentName Название окружения. При изменении конфигов возьмутся данные из JSON с соответствующим префиксом. Напирмер, "dev-pushin"
@@ -753,4 +753,4 @@ function Install-TessaPrerequisites
     }
 }
 
-Export-ModuleMember -Function Install-TessaPrerequisites
+Export-ModuleMember -Function Install-Tessa
