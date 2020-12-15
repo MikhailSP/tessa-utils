@@ -669,6 +669,28 @@ function Execute-Tadmin{
     Execute-CommandWithExceptionOnErrorCode -CommandPath $global:tadmin -CommandArguments $Arguments
 }
 
+function Get-TessaNode{
+    [CmdletBinding()]
+    param(
+        [string] $EnvironmentFileName,
+        [object] $EnvironmentJson
+    )
+    $node=$Null
+
+    foreach($nodeJson in $EnvironmentJson.nodes){
+        if ($nodeJson.name -eq $NodeName){
+            $node=$nodeJson
+            break
+        }
+    }
+
+    if ($Null -eq $node){
+        Write-Error "Node with name='$NodeName' not found in $EnvironmentFileName"
+        throw "Node with name='$NodeName' not found in $EnvironmentFileName"
+    }
+    $node
+}
+
 function Install-Tessa
 {
     <#
@@ -705,11 +727,12 @@ function Install-Tessa
     Write-Verbose "Using config from $installSettingsFileName"
     
     $environmentFileName="$settingsFolder\environments\$EnvironmentName.json"
-    Write-Verbose "Using environment from $environmentFileName"
     
     $environmentJson=Get-Content $environmentFileName | Out-String | ConvertFrom-Json
     $appJsonPartOfEnvironment=$environmentJson.'app.json'
-    
+    $node=Get-TessaNode -EnvironmentFileName $environmentFileName -EnvironmentJson $environmentJson -Verbose
+    Write-Verbose "Using node '$NodeName' and environment from $environmentFileName"
+
     $json = Get-Content $installSettingsFileName | Out-String | ConvertFrom-Json
     $commonRole = $json.roles.common
     $webRole = $json.roles.web
