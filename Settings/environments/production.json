@@ -1,0 +1,55 @@
+﻿{
+  "name": "Production",
+  "description": "Production Tessa, two Web nodes and two Chronos nodes",
+  
+  "nodes": [
+    {
+      "name": "web-n1",
+      "description": "First web node",
+      "roles": [
+        "web"
+      ]
+    },
+    {
+      "name": "web-n2",
+      "description": "Second web node",
+      "roles": [
+        "web"
+      ]
+    },
+    {
+      "name": "chronos-n1",
+      "description": "First Chronos node",
+      "roles": [
+        "chronos"
+      ]
+    },
+    {
+      "name": "chronos-n2",
+      "description": "Second Chronos node",
+      "roles": [
+        "chronos"
+      ]
+    }
+  ],
+  
+  "app.json":{
+    "common": {
+      "ConnectionStrings": {
+        "default": "Server=tessa-sql; Database=tessa; Integrated Security=true; Connect Timeout=200; pooling=true; Max Pool Size=200; MultipleActiveResultSets=true;"
+      },
+
+      "Settings": {
+        "ServerCode": "some-production"
+      },
+      
+      "SomeSettingsWhichWillBeOnWebAndChronos": "SomeValue"
+    },
+    "web": {
+      "SomeSettingsWhichShouldBeOnlyOnWeb": "SomeValue"
+    },
+    "chronos": {
+      "SomeSettingsWhichShouldBeOnlyOnChronos": "SomeValue"      
+    }
+  }
+}
