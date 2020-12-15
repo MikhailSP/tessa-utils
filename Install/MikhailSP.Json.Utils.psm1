@@ -115,4 +115,29 @@ function Merge-JsonFiles(){
     Set-Content -Path $TargetFile -Value $targetStr -Force;
 }
 
+function Merge-JsonContent(){
+    <#
+    .SYNOPSIS
+        Merge content of several JSON objects to one JSON file.
+    .DESCRIPTION
+        Merges several JSON objects from ContentsToMerge into a single TargetFile. 
+    .PARAMETER TargetFile
+        Required: [string] Target file path for merged JSON.
+    .PARAMETER ContentsToMerge
+        Required: JSON contents which should be merged. The next content overrides data parts of previous if they are the same
+    #>
+    [CmdletBinding()]
+    param(
+        [string] $TargetFile,
+        [object[]] $ContentsToMerge
+    )
+    $targetJson=@{}
+    foreach($contentToMerge in $ContentsToMerge){
+        Merge-Jsons -Target $targetJson -Source $contentToMerge
+    }
+    $targetStr=$targetJson | ConvertTo-Json -Depth 5 | Format-Json
+    Set-Content -Path $TargetFile -Value $targetStr -Force;
+}
+
 Export-ModuleMember -Function Merge-JsonFiles
+Export-ModuleMember -Function Merge-JsonContent
