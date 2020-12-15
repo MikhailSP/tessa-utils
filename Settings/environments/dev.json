@@ -1,0 +1,34 @@
+﻿{
+  "name": "Dev",
+  "description": "Development Tessa, all roles on the same machine",
+  
+  "nodes": [
+    {
+      "name": "main",
+      "description": "Main and the only node",
+      "roles": [
+        "web",
+        "chronos",
+        "sql"
+      ]
+    }
+  ],
+  
+  "app.json":{
+    "common": {
+      "ConnectionStrings": {
+        "default": "Server=localhost; Database=tessa; Integrated Security=true; Connect Timeout=200; pooling=true; Max Pool Size=200; MultipleActiveResultSets=true;"
+      },
+
+      "Settings": {
+        "ServerCode": "some-dev"
+      }
+    },
+    "web": {
+      
+    },
+    "chronos": {
+      
+    }
+  }
+}

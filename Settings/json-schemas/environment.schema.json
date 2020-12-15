@@ -1,0 +1,75 @@
+﻿{
+  "$schema": "https://github.com/MikhailSP/tessa-utils/environment/schema#",
+  "definitions": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "web",
+        "chronos",
+        "sql"
+      ]
+    },
+    "node": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/role"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "roles"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "app.json": {
+      "type": "object",
+      "properties": {
+        "common": {
+          "type": "object"
+        },
+        "web": {
+          "type": "object"
+        },
+        "chronos": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "common",
+        "web",
+        "chronos"
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "nodes",
+    "app.json"
+  ]
+}
