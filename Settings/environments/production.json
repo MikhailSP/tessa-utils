@@ -33,6 +33,17 @@
     }
   ],
   
+  "install-settings": {
+    "roles": {
+      "web": {
+        "iis": {
+          "pool-account": "mont\\tessa",
+          "pool-account-password": "REPLACE_WITH_REAL_PASSWORD"
+        }
+      }
+    }
+  },
+  
   "app.json":{
     "common": {
       "ConnectionStrings": {

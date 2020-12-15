@@ -244,6 +244,7 @@
     "name",
     "description",
     "nodes",
+    "install-settings",
     "app.json"
   ]
 }
