@@ -366,9 +366,9 @@ class ChangeAppJsonStep : Step
     }
     
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
-        $environmentJsonFile="$PSScriptRoot\config\$($this.EnvironmentName).json"
-        $environmentWebJsonFile="$PSScriptRoot\config\$($this.EnvironmentName).web.json"
-        $environmentWebChronosFile="$PSScriptRoot\config\$($this.EnvironmentName).chronos.json"
+        $environmentJsonFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).json"
+        $environmentWebJsonFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).web.json"
+        $environmentWebChronosFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).chronos.json"
         $filesToMerge=@()
         $filesToMerge+=$this.AppJsonPath
         $filesToMerge+=$environmentJsonFile
