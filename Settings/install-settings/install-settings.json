@@ -54,7 +54,7 @@
     "sql": {
       "disabled": false,
       "iso-path": "C:\\Dev\\en_sql_server_2019_developer_x64_dvd_e5ade34a.iso",
-      "ini-file": "C:\\Dev\\Install\\config\\SqlConfigurationFile.ini",
+      "ini-file": "C:\\Dev\\Settings\\install-settings\\SqlConfigurationFile.ini",
       "admin": "mont\\mpushin",
       "admin2": "mont\\tessa"
     }
