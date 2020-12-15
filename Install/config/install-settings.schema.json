@@ -1,0 +1,248 @@
+﻿{
+  "$schema": "https://github.com/MikhailSP/tessa-utils/install-settings/schema#",
+  "type": "object",
+  "properties": {
+    "roles": {
+      "type": "object",
+      "properties": {
+        "common": {
+          "type": "object",
+          "properties": {
+            "paths": {
+              "type": "object",
+              "properties": {
+                "temp": {
+                  "type": "string"
+                },
+                "license": {
+                  "type": "string"
+                },
+                "tessa-distrib": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "temp",
+                "license",
+                "tessa-distrib"
+              ]
+            },
+            "keyboard-layout": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                },
+                "layout": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "disabled",
+                "layout"
+              ]
+            },
+            "timezone": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "disabled",
+                "name"
+              ]
+            },
+            "soft": {
+              "type": "object",
+              "properties": {
+                "notepad-pp": {
+                  "type": "object",
+                  "properties": {
+                    "disabled": {
+                      "type": "boolean"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "argument": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "disabled",
+                    "url",
+                    "argument"
+                  ]
+                },
+                "totalcmd": {
+                  "type": "object",
+                  "properties": {
+                    "disabled": {
+                      "type": "boolean"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "argument": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "disabled",
+                    "url",
+                    "argument"
+                  ]
+                }
+              },
+              "required": [
+                "notepad-pp",
+                "totalcmd"
+              ]
+            },
+            "psremoting": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "disabled"
+              ]
+            }
+          },
+          "required": [
+            "paths",
+            "keyboard-layout",
+            "timezone",
+            "soft",
+            "psremoting"
+          ]
+        },
+        "web": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean"
+            },
+            "iis": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                },
+                "site": {
+                  "type": "string"
+                },
+                "port": {
+                  "type": "integer"
+                },
+                "dns-name": {
+                  "type": "string"
+                },
+                "pool-name": {
+                  "type": "string"
+                },
+                "pool-account": {
+                  "type": "string"
+                },
+                "pool-account-password": {
+                  "type": "string"
+                },
+                "tessa-folder": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "disabled",
+                "site",
+                "port",
+                "dns-name",
+                "pool-name",
+                "pool-account",
+                "pool-account-password",
+                "tessa-folder"
+              ]
+            },
+            "core-runtime": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "disabled",
+                "url"
+              ]
+            }
+          },
+          "required": [
+            "disabled",
+            "iis",
+            "core-runtime"
+          ]
+        },
+        "chronos": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean"
+            },
+            "folder": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "disabled",
+            "folder"
+          ]
+        },
+        "sql": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "type": "boolean"
+            },
+            "iso-path": {
+              "type": "string"
+            },
+            "ini-file": {
+              "type": "string"
+            },
+            "admin": {
+              "type": "string"
+            },
+            "admin2": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "disabled",
+            "iso-path",
+            "ini-file",
+            "admin",
+            "admin2"
+          ]
+        }
+      },
+      "required": [
+        "common",
+        "web",
+        "chronos",
+        "sql"
+      ]
+    }
+  },
+  "required": [
+    "roles"
+  ]
+}
