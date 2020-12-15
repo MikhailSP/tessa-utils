@@ -49,7 +49,11 @@
     },
     "chronos": {
       "disabled": false,
-      "folder" : "c:\\Tessa\\Chronos"
+      "folder" : "c:\\Tessa\\Chronos",
+      "cluster": {
+        "disabled": false,
+        "name": "tessa-dev-chr"
+      }
     },
     "sql": {
       "disabled": false,

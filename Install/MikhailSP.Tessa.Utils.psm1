@@ -623,6 +623,16 @@ class StartTessaClientStep : Step
     }
 }
 
+class InstallClusterFeatureStep: Step
+{
+    InstallClusterFeatureStep([object]$json): base("Installing Cluster Manager Feature", $json, @([Role]::Chronos)){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        Install-WindowsFeature -Name Failover-Clustering, RSAT-Clustering-Mgmt, RSAT-Clustering-PowerShell -Restart
+        Write-Host -ForegroundColor Gray "Cluster Manager Feature installed";
+    }
+}
+
 
 function Execute-Command
 {
@@ -791,6 +801,7 @@ function Install-Tessa
     $steps += [InstallChronosStep]::new($chronosRole)                                                   # 3.9
     $steps += [StartTessaAdminStep]::new($webRole,$tessaDistribPath)                                    # 3.10
     $steps += [StartTessaClientStep]::new($webRole,$tessaDistribPath)                                   # 3.10
+    $steps += [InstallClusterFeatureStep]::new($chronosRole.cluster)                                   
     
     foreach ($step in $steps)
     {
