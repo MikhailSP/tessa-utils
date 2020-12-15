@@ -21,6 +21,11 @@
           "pool-account": "mont\\tessa-dev",
           "pool-account-password": "REPLACE_WITH_REAL_PASSWORD"
         }
+      },
+      "chronos": {
+        "cluster": {
+          "disabled": true
+        }
       }
     }
   },
