@@ -30,12 +30,18 @@ class Step
             Write-Host -ForegroundColor Magenta "Step '$($this.StepName)' is not applicable for server roles. Skipping"
             continue
         }
+        
+        if ($this.Json.disabled){
+            Write-Host -ForegroundColor Magenta "Step disabled. Skipping step"
+            continue     
+        }
 
         if ($this.DebugMode)
         {
             Write-Host -ForegroundColor Magenta "Debug mode. Skipping step"
             continue
         }
+
         if ($Null -eq $this.Json)
         {
             Write-Host -ForegroundColor Magenta "No config section for step '$( $this.StepName )' in prerequisites.json. Skipping"

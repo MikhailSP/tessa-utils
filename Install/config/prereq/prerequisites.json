@@ -7,25 +7,33 @@
         "tessa-distrib": "c:\\Dev\\tessa-3.5.0"
       },
       "keyboard-layout": {
+        "disabled": false,
         "layout": "ru-RU"
       },
       "timezone": {
+        "disabled": true,
         "name": "Russia TZ 2 Standard Time"
       },
       "soft" : {
         "notepad-pp": {
+          "disabled": false,
           "url" : "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.8.5/npp.7.8.5.Installer.x64.exe",
           "argument": "/S"
         },
         "totalcmd": {
+          "disabled": false,
           "url" : "https://totalcommander.ch/win/tcmd950x64.exe",
           "argument": "/AGDU"
         }
       },
-      "psremoting": {}
+      "psremoting": {
+        "disabled": false
+      }
     },
     "web": {
+      "disabled": false,
       "iis": {
+        "disabled": false,
         "site" : "Default Web Site",
         "port" : 443,
         "dns-name" : "Tessa",
@@ -35,13 +43,16 @@
         "tessa-folder": "c:\\inetpub\\wwwroot\\tessa"
       },
       "core-runtime": {
+        "disabled": false,
         "url" : "https://download.visualstudio.microsoft.com/download/pr/7e35ac45-bb15-450a-946c-fe6ea287f854/a37cfb0987e21097c7969dda482cebd3/dotnet-hosting-3.1.10-win.exe"
       }
     },
     "chronos": {
+      "disabled": false,
       "folder" : "c:\\Tessa\\Chronos"
     },
     "sql": {
+      "disabled": false,
       "iso-path": "C:\\Dev\\en_sql_server_2019_developer_x64_dvd_e5ade34a.iso",
       "ini-file": "C:\\Dev\\Install\\config\\SqlConfigurationFile.ini",
       "admin": "mont\\mpushin",
