@@ -691,6 +691,20 @@ function Get-TessaNode{
     $node
 }
 
+function Get-TessaNodeRole{
+    [CmdletBinding()]
+    param(
+        [object] $Node
+    )
+    
+    $roles=@()
+    foreach ($role in $Node.roles)
+    {
+        $roles += [Role]$role
+    }
+    $roles
+}
+
 function Install-Tessa
 {
     <#
@@ -701,9 +715,6 @@ function Install-Tessa
     #>
     [CmdletBinding()]
     param(
-        [Role[]]
-        $ServerRoles,
-        
         [Version]
         $TessaVersion,
         
@@ -731,8 +742,11 @@ function Install-Tessa
     $environmentJson=Get-Content $environmentFileName | Out-String | ConvertFrom-Json
     $appJsonPartOfEnvironment=$environmentJson.'app.json'
     $node=Get-TessaNode -EnvironmentFileName $environmentFileName -EnvironmentJson $environmentJson -Verbose
-    Write-Verbose "Using node '$NodeName' and environment from $environmentFileName"
+    Write-Verbose "Using node $($node.name) ($($node.description)) and environment from $environmentFileName"
 
+    $serverRoles=Get-TessaNodeRole -Node $node
+    Write-Verbose "Server Roles: $serverRoles"
+    
     $json = Get-Content $installSettingsFileName | Out-String | ConvertFrom-Json
     $commonRole = $json.roles.common
     $webRole = $json.roles.web
@@ -778,7 +792,7 @@ function Install-Tessa
     
     foreach ($step in $steps)
     {
-        $step.DoAndLogStep($ServerRoles, $TessaVersion)
+        $step.DoAndLogStep($serverRoles, $TessaVersion)
     }
 }
 
