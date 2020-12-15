@@ -357,31 +357,28 @@ class GenerateNewSecurityTokenStep : Step
 
 class ChangeAppJsonStep : Step
 {
-    [string] $EnvironmentName
+    [object] $EnvironmentAppJsonSection
     [string] $AppJsonPath
     
-    ChangeAppJsonStep([object] $json, [string] $environmentName, [string] $appJsonPath): base("Changing app.json (merging with custom.json)", $json){
-        $this.EnvironmentName=$environmentName
+    ChangeAppJsonStep([object] $json, [object] $environmentAppJsonSection, [string] $appJsonPath,[Role] $role): base("Changing app.json (merging with custom.json)", $json, $role){
+        $this.EnvironmentAppJsonSection=$environmentAppJsonSection
         $this.AppJsonPath=$appJsonPath
     }
     
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
-        $environmentJsonFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).json"
-        $environmentWebJsonFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).web.json"
-        $environmentWebChronosFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).chronos.json"
-        $filesToMerge=@()
-        $filesToMerge+=$this.AppJsonPath
-        $filesToMerge+=$environmentJsonFile
-        if ($ServerRoles.Contains([Role]::Web)){
-            $filesToMerge+=$environmentWebJsonFile
+        $contentsToMerge=@()
+        $contentsToMerge+=Get-Content -Path $this.AppJsonPath -Raw | ConvertFrom-Json
+        $contentsToMerge+=$this.EnvironmentAppJsonSection.common
+        if ($this.AvailableInServerRoles.Contains([Role]::Web)){
+            $contentsToMerge+=$this.EnvironmentAppJsonSection.web
         }   
-        if ($ServerRoles.Contains([Role]::Chronos)){
-            $filesToMerge+=$environmentWebChronosFile
+        if ($this.AvailableInServerRoles.Contains([Role]::Chronos)){
+            $contentsToMerge+=$this.EnvironmentAppJsonSection.chronos
         }
-        Write-Verbose "Files '$filesToMerge' will be merged into '$($this.AppJsonPath)'"
+ #       Write-Verbose "Files '$filesToMerge' will be merged into '$($this.AppJsonPath)'"
     
         Copy-Item $this.AppJsonPath -Destination "$($this.AppJsonPath).backup";
-        Merge-JsonFiles -TargetFile $this.AppJsonPath -FilesToMerge $filesToMerge
+        Merge-JsonContent -TargetFile $this.AppJsonPath -ContentsToMerge $contentsToMerge
         Write-Host -ForegroundColor Gray "app.json changed (merged with custom.json)";
     }
 }
@@ -692,7 +689,10 @@ function Install-Tessa
         $SettingsBaseFolder,
         
         [string]
-        $EnvironmentName
+        $EnvironmentName,
+    
+        [string]
+        $NodeName
     )
 
     Write-Verbose "Installing Tessa $TessaVersion with prerequisites for roles $( $ServerRoles|foreach { $_ } )"
@@ -703,6 +703,12 @@ function Install-Tessa
     }
     $installSettingsFileName="$settingsFolder\install-settings\install-settings.json"
     Write-Verbose "Using config from $installSettingsFileName"
+    
+    $environmentFileName="$settingsFolder\environments\$EnvironmentName.json"
+    Write-Verbose "Using environment from $environmentFileName"
+    
+    $environmentJson=Get-Content $environmentFileName | Out-String | ConvertFrom-Json
+    $appJsonPartOfEnvironment=$environmentJson.'app.json'
     
     $json = Get-Content $installSettingsFileName | Out-String | ConvertFrom-Json
     $commonRole = $json.roles.common
@@ -729,10 +735,10 @@ function Install-Tessa
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')                      # 3.3.5
     $steps += [RequireSslStep]::new($webRole.'iis')                                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                                      # 3.3.7
-    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                       # 3.4
-    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")      # 3.5
-    $steps += [CopyChronosStep]::new($chronosRole,$tessaDistribPath,$licenseFile)                         # 3.6
-    $steps += [ChangeAppJsonStep]::new($chronosRole,$EnvironmentName,"$($chronosRole.folder)\app.json")   # 3.6
+    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                             # 3.4
+    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$appJsonPartOfEnvironment,"$tessaFolderInIis\app.json", [Role]::Web)   # 3.5
+    $steps += [CopyChronosStep]::new($chronosRole,$tessaDistribPath,$licenseFile)                               # 3.6
+    $steps += [ChangeAppJsonStep]::new($chronosRole,$appJsonPartOfEnvironment,"$($chronosRole.folder)\app.json", [Role]::Chronos)# 3.6
     $steps += [AttachSqlIsoStep]::new($sqlRole)                                      
     $steps += [InstallSqlStep]::new($sqlRole)                                      
     $steps += [InstallSsmsStep]::new($sqlRole,$tempFolder)                                      
@@ -740,7 +746,7 @@ function Install-Tessa
     $steps += [DownloadAndInstallStep]::new($soft.'notepad-pp',$tempFolder,"Notepad++")                                      
     $steps += [DownloadAndInstallStep]::new($soft.'totalcmd',$tempFolder,"Total Commander")                                      
     $steps += [EnablePsRemotingStep]::new($commonRole.'psremoting')
-    $steps += [ChangeAppJsonStep]::new($webRole,$EnvironmentName,"$tessaDistribPath\Tools\app.json")    # 3.7
+    $steps += [ChangeAppJsonStep]::new($webRole,$appJsonPartOfEnvironment,"$tessaDistribPath\Tools\app.json", [Role]::Web)    # 3.7
     $steps += [InstallTessaDefaultConfigurationStep]::new($webRole,$tessaDistribPath)                   # 3.7
     $steps += [CheckTessaWebServicesStep]::new($webRole)                                                # 3.8
     $steps += [InstallChronosStep]::new($chronosRole)                                                   # 3.9
