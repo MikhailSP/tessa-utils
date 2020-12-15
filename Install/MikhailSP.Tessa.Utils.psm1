@@ -741,6 +741,7 @@ function Install-Tessa
     
     $environmentJson=Get-Content $environmentFileName | Out-String | ConvertFrom-Json
     $appJsonPartOfEnvironment=$environmentJson.'app.json'
+    $installSettingsPartOfEnvironment=$environmentJson.'install-settings'
     $node=Get-TessaNode -EnvironmentFileName $environmentFileName -EnvironmentJson $environmentJson -Verbose
     Write-Verbose "Installing node '$($node.name)' ($($node.description))"
 
@@ -748,6 +749,7 @@ function Install-Tessa
     Write-Verbose "Server Roles: $serverRoles"
     
     $json = Get-Content $installSettingsFileName | Out-String | ConvertFrom-Json
+    Merge-Jsons -Target $json -Source $installSettingsPartOfEnvironment
     $commonRole = $json.roles.common
     $webRole = $json.roles.web
     $chronosRole = $json.roles.chronos

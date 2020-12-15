@@ -139,5 +139,6 @@ function Merge-JsonContent(){
     Set-Content -Path $TargetFile -Value $targetStr -Force;
 }
 
+Export-ModuleMember -Function Merge-Jsons
 Export-ModuleMember -Function Merge-JsonFiles
 Export-ModuleMember -Function Merge-JsonContent
