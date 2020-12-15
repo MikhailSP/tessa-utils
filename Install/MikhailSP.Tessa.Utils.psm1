@@ -687,14 +687,24 @@ function Install-TessaPrerequisites
         
         [Version]
         $TessaVersion,
-    
+        
+        [string]
+        $SettingsBaseFolder,
+        
         [string]
         $EnvironmentName
     )
 
     Write-Verbose "Installing Tessa $TessaVersion with prerequisites for roles $( $ServerRoles|foreach { $_ } )"
 
-    $json = Get-Content "$PSScriptRoot\config\install-settings.json" | Out-String | ConvertFrom-Json
+    $settingsFolder="$PSScriptRoot\..\Settings"
+    if ("" -ne $SettingsBaseFolder){
+        $settingsFolder=$SettingsBaseFolder
+    }
+    $installSettingsFileName="$settingsFolder\install-settings\install-settings.json"
+    Write-Verbose "Using config from $installSettingsFileName"
+    
+    $json = Get-Content $installSettingsFileName | Out-String | ConvertFrom-Json
     $commonRole = $json.roles.common
     $webRole = $json.roles.web
     $chronosRole = $json.roles.chronos
