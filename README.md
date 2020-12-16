@@ -39,6 +39,13 @@
 
 После генерации классов необходимо использовать SelectBuilder и UpdateBuilder из сгенерированных классов для запросов к БД примерно следующим образом:
 
+#### Получение всех персональных ролей в виде списка объектов типа PesonalRoleClass 
+```c#
+var allPersonalRoles=PersonalRolesClass.SelectBuilder(dbScope)
+                    .ExecuteList();
+```
+
+#### Получение списка пользователей с фамилией Иванов. В объектах будут заполнены только поля ID и Name
 ```c#
 var ivanovs=PersonalRolesClass.SelectBuilder(dbScope)
                     .Select(PersonalRoles.ID, PersonalRoles.Name)
@@ -46,6 +53,7 @@ var ivanovs=PersonalRolesClass.SelectBuilder(dbScope)
                     .ExecuteList();
 ```
 
+#### Обновление фамилии и отчества пользователей с именем "Петр"
 ```c#
 var updatedColumnsCount = PersonalRolesClass.UpdateBuilder(dbScope)
                             .Set(PersonalRoles.LastName, "Петров")
@@ -55,4 +63,56 @@ var updatedColumnsCount = PersonalRolesClass.UpdateBuilder(dbScope)
     
 ```
 
-Больше вариантов вызова можно посмотреть в комментарии к методам SelectBuilder и UpdateBuilder
+### Пример использования методов расширения карточки из CardExtensions.cs
+
+#### Например, можно получить значение имени пользователя из загруженной карточки карточки.  
+
+```c#
+var name=card.GetSectionValueOrNull(PersonalRoles.Name);
+```
+
+#### Метод ниже позволяет получить значение из карточки или БД. 
+
+Его удобно использовать, например, в StoreExtension, когда в карточке видна только дельта и приходится вручную собирать значения из карточки и БД.
+
+```c#
+var name=GetSectionValueFromCardOrDbOrNull(PersonalRoles.Name);
+```
+
+#### Получение количества файлов, которые будут доступны после сохранения карточки (мерж карточки  БД)
+```c#
+var filesCount=card.GetFilesCountInDB(context.DbScope);
+```
+
+#### Заполнение поля карточки
+```c#
+card.FillSection(PersonalRoles.FirstName,"Иван");
+```
+
+Также доступен метод "тихого" заполнения FillSectionSilently. Он выполняет RemoveChanges после изменения. И заполнение сразу нескольких полей.
+
+#### Копирование секции одной карточки в другую за исключением набора полей
+```c#
+sourceCard.CopySection(targetCard,PersonalRoles.ID,PersonalRoles.Login);
+```
+
+Также есть метод копирования только нескольких полей или таблицы из секции другой карточки - CopyFieldsFrom / CopyTable
+
+
+#### IntelliSense подсказывает доступные поля. 
+Например, не получится по ошибке запросить PersonalRoles.Account, т.к. такого поля нет, но есть PersonalRoles.Login.
+
+Все доступные поля имеют комментарии, которые берутся из схемы БД. Например, вызвав подсказку по PersonalRoles.Login прямо в коде можно увидеть, что 
+- описание: "Логин пользователя или имя доменного аккаунта";
+  
+- физическая колонка; 
+
+- тип String(256) Null;
+
+- ID, библиотеку и прочие параметры колонки.
+
+Nullable поля классов генерируются в виде T? для исключения ошибок неинициализации всех нужны полей в коде.  [C#8. Типы, допускающие значение NULL](https://docs.microsoft.com/ru-ru/dotnet/csharp/language-reference/builtin-types/nullable-reference-types)
+
+#### Больше вариантов вызова можно посмотреть в комментарии к методам классов SelectBuilder, UpdateBuilder и CardExtensions. 
+
+Документация дополняется.
