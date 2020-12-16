@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JsonSchemaMappingsProjectConfiguration">
+    <state>
+      <map>
+        <entry key="environment.schema">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="environment.schema" />
+              <option name="relativePathToSchema" value="Settings/json-schemas/environment.schema.json" />
+              <option name="schemaVersion" value="JSON Schema version 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="path" value="Settings/environments/dev.json" />
+                  </Item>
+                  <Item>
+                    <option name="path" value="Settings/environments/production.json" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+        <entry key="install-settings.schema">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="install-settings.schema" />
+              <option name="relativePathToSchema" value="Settings/json-schemas/install-settings.schema.json" />
+              <option name="schemaVersion" value="JSON Schema version 7" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="path" value="Install/config/install-settings.json" />
+                  </Item>
+                  <Item>
+                    <option name="path" value="Settings/install-settings/install-settings.json" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+      </map>
+    </state>
+  </component>
+</project>
