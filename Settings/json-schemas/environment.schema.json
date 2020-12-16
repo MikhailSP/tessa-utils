@@ -1,0 +1,261 @@
+﻿{
+  "$schema": "https://github.com/MikhailSP/tessa-utils/environment/schema#",
+  "definitions": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "web",
+        "chronos",
+        "sql"
+      ]
+    },
+    "node": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/role"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "roles"
+      ]
+    },
+    "install-settings": {
+      "type": "object",
+      "properties": {
+        "roles": {
+          "type": "object",
+          "properties": {
+            "common": {
+              "type": "object",
+              "properties": {
+                "paths": {
+                  "type": "object",
+                  "properties": {
+                    "temp": {
+                      "type": "string"
+                    },
+                    "license": {
+                      "type": "string"
+                    },
+                    "tessa-distrib": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "keyboard-layout": {
+                  "type": "object",
+                  "properties": {
+                    "disabled": {
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "timezone": {
+                  "type": "object",
+                  "properties": {
+                    "disabled": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "soft": {
+                  "type": "object",
+                  "properties": {
+                    "notepad-pp": {
+                      "type": "object",
+                      "properties": {
+                        "disabled": {
+                          "type": "boolean"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "argument": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "totalcmd": {
+                      "type": "object",
+                      "properties": {
+                        "disabled": {
+                          "type": "boolean"
+                        },
+                        "url": {
+                          "type": "string"
+                        },
+                        "argument": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "psremoting": {
+                  "type": "object",
+                  "properties": {
+                    "disabled": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            },
+            "web": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                },
+                "iis": {
+                  "type": "object",
+                  "properties": {
+                    "disabled": {
+                      "type": "boolean"
+                    },
+                    "site": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "integer"
+                    },
+                    "dns-name": {
+                      "type": "string"
+                    },
+                    "pool-name": {
+                      "type": "string"
+                    },
+                    "pool-account": {
+                      "type": "string"
+                    },
+                    "pool-account-password": {
+                      "type": "string"
+                    },
+                    "tessa-folder": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "core-runtime": {
+                  "type": "object",
+                  "properties": {
+                    "disabled": {
+                      "type": "boolean"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "chronos": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                },
+                "folder": {
+                  "type": "string"
+                },
+                "cluster": {
+                  "type": "object",
+                  "properties": {
+                    "disabled": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "sql": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                },
+                "iso-path": {
+                  "type": "string"
+                },
+                "ini-file": {
+                  "type": "string"
+                },
+                "admin": {
+                  "type": "string"
+                },
+                "admin2": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "install-settings": {
+      "$ref": "#/definitions/install-settings"
+    },
+    "app.json": {
+      "type": "object",
+      "properties": {
+        "common": {
+          "type": "object"
+        },
+        "web": {
+          "type": "object"
+        },
+        "chronos": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "common",
+        "web",
+        "chronos"
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "nodes",
+    "install-settings",
+    "app.json"
+  ]
+}

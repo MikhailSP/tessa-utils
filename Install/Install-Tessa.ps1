@@ -4,4 +4,4 @@ $OutputEncoding=[Console]::OutputEncoding
 
 
 Import-Module "$PSScriptRoot\MikhailSP.Tessa.Utils.psm1" -Force -Verbose
-Install-TessaPrerequisites -ServerRoles Web,Sql,Chronos -TessaVersion v3_5_0 -EnvironmentName "dev-pushin" -Verbose
+Install-Tessa -TessaVersion v3_5_0 -EnvironmentName "dev" -NodeName "main" -Verbose

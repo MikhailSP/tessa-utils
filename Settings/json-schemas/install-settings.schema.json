@@ -199,11 +199,27 @@
             },
             "folder": {
               "type": "string"
+            },
+            "cluster": {
+              "type": "object",
+              "properties": {
+                "disabled": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "disabled",
+                "name"
+              ]
             }
           },
           "required": [
             "disabled",
-            "folder"
+            "folder",
+            "cluster"
           ]
         },
         "sql": {

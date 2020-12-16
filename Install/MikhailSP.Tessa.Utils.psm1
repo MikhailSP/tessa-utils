@@ -357,31 +357,28 @@ class GenerateNewSecurityTokenStep : Step
 
 class ChangeAppJsonStep : Step
 {
-    [string] $EnvironmentName
+    [object] $EnvironmentAppJsonSection
     [string] $AppJsonPath
     
-    ChangeAppJsonStep([object] $json, [string] $environmentName, [string] $appJsonPath): base("Changing app.json (merging with custom.json)", $json){
-        $this.EnvironmentName=$environmentName
+    ChangeAppJsonStep([object] $json, [object] $environmentAppJsonSection, [string] $appJsonPath,[Role] $role): base("Changing app.json (merging with custom.json)", $json, $role){
+        $this.EnvironmentAppJsonSection=$environmentAppJsonSection
         $this.AppJsonPath=$appJsonPath
     }
     
     [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
-        $environmentJsonFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).json"
-        $environmentWebJsonFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).web.json"
-        $environmentWebChronosFile="$PSScriptRoot\config\environments\$($this.EnvironmentName).chronos.json"
-        $filesToMerge=@()
-        $filesToMerge+=$this.AppJsonPath
-        $filesToMerge+=$environmentJsonFile
-        if ($ServerRoles.Contains([Role]::Web)){
-            $filesToMerge+=$environmentWebJsonFile
+        $contentsToMerge=@()
+        $contentsToMerge+=Get-Content -Path $this.AppJsonPath -Raw | ConvertFrom-Json
+        $contentsToMerge+=$this.EnvironmentAppJsonSection.common
+        if ($this.AvailableInServerRoles.Contains([Role]::Web)){
+            $contentsToMerge+=$this.EnvironmentAppJsonSection.web
         }   
-        if ($ServerRoles.Contains([Role]::Chronos)){
-            $filesToMerge+=$environmentWebChronosFile
+        if ($this.AvailableInServerRoles.Contains([Role]::Chronos)){
+            $contentsToMerge+=$this.EnvironmentAppJsonSection.chronos
         }
-        Write-Verbose "Files '$filesToMerge' will be merged into '$($this.AppJsonPath)'"
+ #       Write-Verbose "Files '$filesToMerge' will be merged into '$($this.AppJsonPath)'"
     
         Copy-Item $this.AppJsonPath -Destination "$($this.AppJsonPath).backup";
-        Merge-JsonFiles -TargetFile $this.AppJsonPath -FilesToMerge $filesToMerge
+        Merge-JsonContent -TargetFile $this.AppJsonPath -ContentsToMerge $contentsToMerge
         Write-Host -ForegroundColor Gray "app.json changed (merged with custom.json)";
     }
 }
@@ -626,6 +623,16 @@ class StartTessaClientStep : Step
     }
 }
 
+class InstallClusterFeatureStep: Step
+{
+    InstallClusterFeatureStep([object]$json): base("Installing Cluster Manager Feature", $json, @([Role]::Chronos)){}
+
+    [void] DoStep([Role[]] $ServerRoles, [Version] $TessaVersion){
+        Install-WindowsFeature -Name Failover-Clustering, RSAT-Clustering-Mgmt, RSAT-Clustering-PowerShell -Restart
+        Write-Host -ForegroundColor Gray "Cluster Manager Feature installed";
+    }
+}
+
 
 function Execute-Command
 {
@@ -672,29 +679,87 @@ function Execute-Tadmin{
     Execute-CommandWithExceptionOnErrorCode -CommandPath $global:tadmin -CommandArguments $Arguments
 }
 
-function Install-TessaPrerequisites
+function Get-TessaNode{
+    [CmdletBinding()]
+    param(
+        [string] $EnvironmentFileName,
+        [object] $EnvironmentJson
+    )
+    $node=$Null
+
+    foreach($nodeJson in $EnvironmentJson.nodes){
+        if ($nodeJson.name -eq $NodeName){
+            $node=$nodeJson
+            break
+        }
+    }
+
+    if ($Null -eq $node){
+        Write-Error "Node with name='$NodeName' not found in $EnvironmentFileName"
+        throw "Node with name='$NodeName' not found in $EnvironmentFileName"
+    }
+    $node
+}
+
+function Get-TessaNodeRole{
+    [CmdletBinding()]
+    param(
+        [object] $Node
+    )
+    
+    $roles=@()
+    foreach ($role in $Node.roles)
+    {
+        $roles += [Role]$role
+    }
+    $roles
+}
+
+function Install-Tessa
 {
     <#
-        Установить пререквизиты (вещи, обязательные для установки Tessa, например, IIS для сервера приложений)
+        Установить Тессу (в т.ч. вещи, обязательные для установки Tessa, например, IIS для сервера приложений)
         .PARAMETER ServerRoles Роли сервера
         .PARAMETER TessaVersion Версия Тессы, пререквизиты к которой надо поставить
         .PARAMETER EnvironmentName Название окружения. При изменении конфигов возьмутся данные из JSON с соответствующим префиксом. Напирмер, "dev-pushin"
     #>
     [CmdletBinding()]
     param(
-        [Role[]]
-        $ServerRoles,
-        
         [Version]
         $TessaVersion,
+        
+        [string]
+        $SettingsBaseFolder,
+        
+        [string]
+        $EnvironmentName,
     
         [string]
-        $EnvironmentName
+        $NodeName
     )
 
     Write-Verbose "Installing Tessa $TessaVersion with prerequisites for roles $( $ServerRoles|foreach { $_ } )"
 
-    $json = Get-Content "$PSScriptRoot\config\install-settings.json" | Out-String | ConvertFrom-Json
+    $settingsFolder="$PSScriptRoot\..\Settings"
+    if ("" -ne $SettingsBaseFolder){
+        $settingsFolder=$SettingsBaseFolder
+    }
+    $installSettingsFileName="$settingsFolder\install-settings\install-settings.json"
+    Write-Verbose "Using config from $installSettingsFileName"
+    
+    $environmentFileName="$settingsFolder\environments\$EnvironmentName.json"
+    
+    $environmentJson=Get-Content $environmentFileName | Out-String | ConvertFrom-Json
+    $appJsonPartOfEnvironment=$environmentJson.'app.json'
+    $installSettingsPartOfEnvironment=$environmentJson.'install-settings'
+    $node=Get-TessaNode -EnvironmentFileName $environmentFileName -EnvironmentJson $environmentJson -Verbose
+    Write-Verbose "Installing node '$($node.name)' ($($node.description))"
+
+    $serverRoles=Get-TessaNodeRole -Node $node
+    Write-Verbose "Server Roles: $serverRoles"
+    
+    $json = Get-Content $installSettingsFileName | Out-String | ConvertFrom-Json
+    Merge-Jsons -Target $json -Source $installSettingsPartOfEnvironment
     $commonRole = $json.roles.common
     $webRole = $json.roles.web
     $chronosRole = $json.roles.chronos
@@ -719,10 +784,10 @@ function Install-TessaPrerequisites
     $steps += [ConvertFolderToWebApplicationStep]::new($webRole.'iis')                      # 3.3.5
     $steps += [RequireSslStep]::new($webRole.'iis')                                         # 3.3.6
     $steps += [EnableWinAuthStep]::new($webRole.'iis')                                      # 3.3.7
-    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                       # 3.4
-    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$EnvironmentName,"$tessaFolderInIis\app.json")      # 3.5
-    $steps += [CopyChronosStep]::new($chronosRole,$tessaDistribPath,$licenseFile)                         # 3.6
-    $steps += [ChangeAppJsonStep]::new($chronosRole,$EnvironmentName,"$($chronosRole.folder)\app.json")   # 3.6
+    $steps += [GenerateNewSecurityTokenStep]::new($webRole.'iis',$tessaDistribPath)                             # 3.4
+    $steps += [ChangeAppJsonStep]::new($webRole.'iis',$appJsonPartOfEnvironment,"$tessaFolderInIis\app.json", [Role]::Web)   # 3.5
+    $steps += [CopyChronosStep]::new($chronosRole,$tessaDistribPath,$licenseFile)                               # 3.6
+    $steps += [ChangeAppJsonStep]::new($chronosRole,$appJsonPartOfEnvironment,"$($chronosRole.folder)\app.json", [Role]::Chronos)# 3.6
     $steps += [AttachSqlIsoStep]::new($sqlRole)                                      
     $steps += [InstallSqlStep]::new($sqlRole)                                      
     $steps += [InstallSsmsStep]::new($sqlRole,$tempFolder)                                      
@@ -730,17 +795,18 @@ function Install-TessaPrerequisites
     $steps += [DownloadAndInstallStep]::new($soft.'notepad-pp',$tempFolder,"Notepad++")                                      
     $steps += [DownloadAndInstallStep]::new($soft.'totalcmd',$tempFolder,"Total Commander")                                      
     $steps += [EnablePsRemotingStep]::new($commonRole.'psremoting')
-    $steps += [ChangeAppJsonStep]::new($webRole,$EnvironmentName,"$tessaDistribPath\Tools\app.json")    # 3.7
+    $steps += [ChangeAppJsonStep]::new($webRole,$appJsonPartOfEnvironment,"$tessaDistribPath\Tools\app.json", [Role]::Web)    # 3.7
     $steps += [InstallTessaDefaultConfigurationStep]::new($webRole,$tessaDistribPath)                   # 3.7
-    $steps += [CheckTessaWebServicesStep]::new($webRole)                                                # 3.8
+#    $steps += [CheckTessaWebServicesStep]::new($webRole)                                                # 3.8 Need to fix working with self-signed SSL
     $steps += [InstallChronosStep]::new($chronosRole)                                                   # 3.9
     $steps += [StartTessaAdminStep]::new($webRole,$tessaDistribPath)                                    # 3.10
     $steps += [StartTessaClientStep]::new($webRole,$tessaDistribPath)                                   # 3.10
+    $steps += [InstallClusterFeatureStep]::new($chronosRole.cluster)                                   
     
     foreach ($step in $steps)
     {
-        $step.DoAndLogStep($ServerRoles, $TessaVersion)
+        $step.DoAndLogStep($serverRoles, $TessaVersion)
     }
 }
 
-Export-ModuleMember -Function Install-TessaPrerequisites
+Export-ModuleMember -Function Install-Tessa
