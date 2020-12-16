@@ -1,5 +1,9 @@
-﻿$SchemeFolder="$PSScriptRoot\..\..\Configuration\Scheme\" #В этой папке должна находиться схема данных Тесса (tsd-файл и папки)
-$OutputBaseFolder="$PSScriptRoot\..\..\Extensions\Tessa.Extensions.Shared"
+﻿#В этой папке должна находиться схема данных Тесса (tsd-файл и папки, получаемые при экспорте схемы)
+$SchemeFolder="$PSScriptRoot\..\Configuration\Scheme\"
+
+#Путь в котором будут созданы сгенерированные файлы (поправить на путь к Tessa.Extensions.Shared реального проекта)
+$OutputBaseFolder="$PSScriptRoot\..\Tessa.Extensions.Shared" 
+
 $ClassSuffix="Class"
 $Namespace="Generated.Tables"
 
