@@ -797,7 +797,7 @@ function Install-Tessa
     $steps += [EnablePsRemotingStep]::new($commonRole.'psremoting')
     $steps += [ChangeAppJsonStep]::new($webRole,$appJsonPartOfEnvironment,"$tessaDistribPath\Tools\app.json", [Role]::Web)    # 3.7
     $steps += [InstallTessaDefaultConfigurationStep]::new($webRole,$tessaDistribPath)                   # 3.7
-    $steps += [CheckTessaWebServicesStep]::new($webRole)                                                # 3.8
+#    $steps += [CheckTessaWebServicesStep]::new($webRole)                                                # 3.8 Need to fix working with self-signed SSL
     $steps += [InstallChronosStep]::new($chronosRole)                                                   # 3.9
     $steps += [StartTessaAdminStep]::new($webRole,$tessaDistribPath)                                    # 3.10
     $steps += [StartTessaClientStep]::new($webRole,$tessaDistribPath)                                   # 3.10
