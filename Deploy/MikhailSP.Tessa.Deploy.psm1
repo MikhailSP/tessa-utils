@@ -177,19 +177,20 @@ function Merge-Jsons ($target, $source) {
 
 function Read-TessaDeploySectionFromJson{
     param(
+        [string] $DeployJsonsPath,
         [string] $DeploySettings,
         [string] $Section,
         [string] $Subsection
     )
 
-    $jsonFile = Join-Path -Path $TessaDeployJsonPath -ChildPath $DefaultTessaDeployJson
+    $jsonFile = Join-Path -Path $DeployJsonsPath -ChildPath $DefaultTessaDeployJson
     if (($DeploySettings -ne $null) -and ($DeploySettings -ne "")){
-        $jsonFile = Join-Path -Path $TessaDeployJsonPath -ChildPath "$DeploySettings.json"
+        $jsonFile = Join-Path -Path $DeployJsonsPath -ChildPath "$DeploySettings.json"
     }
     
     $jsonContent = Get-Content $jsonFile | ConvertFrom-Json
     if ($jsonContent.parent -ne $null){
-        $parentJson = Join-Path -Path $TessaDeployJsonPath -ChildPath $jsonContent.parent
+        $parentJson = Join-Path -Path $DeployJsonsPath -ChildPath $jsonContent.parent
         $parentJsonContent = Get-Content $parentJson | ConvertFrom-Json
         Merge-Jsons -source $jsonContent -target $parentJsonContent
         $jsonContent = $parentJsonContent
@@ -207,6 +208,7 @@ function Merge-TessaClientWithExtensions{
     param(
         [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $TessaProjectRoot,
+        [string] $DeployJsonsPath,
         [string] $TargetFolder="$DefaultTessaPackageFolder\Code\TessaClient",
         [string] $DeploySettings
     )
@@ -224,7 +226,8 @@ function Merge-TessaClientWithExtensions{
     # Copy-Item -Path "$tessaClientFolder\*" -Destination $tempFolder -Recurse -Force
 
     Write-Verbose "Копирование файлов расширений клиента во временный TessaClient"
-    $filesToCopy=Read-TessaDeploySectionFromJson -DeploySettings $DeploySettings -Section "client"
+    $filesToCopy=Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
+                                                -Section "client"
     foreach($fileToCopy in $filesToCopy){
         Copy-Item -Path "$TessaProjectRoot\$fileToCopy" -Destination $tempFolder -Recurse -Force -Verbose
     }
@@ -244,6 +247,7 @@ function Copy-TessaServerExtensionsPart{
     [CmdletBinding()]
     param(
         [string] $TessaProjectRoot,
+        [string] $DeployJsonsPath,
         [string] $TargetFolder="$DefaultTessaPackageFolder\Code\TessaServer",
         [string] $DeploySettings
     )
@@ -253,7 +257,8 @@ function Copy-TessaServerExtensionsPart{
     New-EmptyFolder -FolderPath $TargetFolder -FolderDescrition "Серверные расширения Tessa" -Verbose
     
     Write-Verbose "Копирование файлов серверных расширений"
-    $filesToCopy=Read-TessaDeploySectionFromJson -DeploySettings $DeploySettings -Section "server"
+    $filesToCopy=Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
+                                            -Section "server"
     foreach($fileToCopy in $filesToCopy){
         Copy-Item -Path "$TessaProjectRoot\$fileToCopy" -Destination $TargetFolder -Recurse -Force -Verbose
     }
@@ -268,6 +273,7 @@ function Copy-TessaChronosExtensionsPart{
     param(
         [string] $TessaProjectRoot,
         [string] $TargetFolder="$DefaultTessaPackageFolder\Code\Chronos",
+        [string] $DeployJsonsPath,
         [string] $DeploySettings
     )
 
@@ -276,7 +282,8 @@ function Copy-TessaChronosExtensionsPart{
     New-EmptyFolder -FolderPath $TargetFolder -FolderDescrition "Расширения Chronos Tessa" -Verbose
     
     Write-Verbose "Копирование файлов расширений Chronos"
-    $filesToCopy=Read-TessaDeploySectionFromJson -DeploySettings $DeploySettings -Section "chronos"
+    $filesToCopy=Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
+                                                -Section "chronos"
     foreach($fileToCopy in $filesToCopy){
         if ($fileToCopy.Contains("\configuration\")){
             New-Item -ItemType Directory -Force -Path "$TargetFolder\configuration"
@@ -298,6 +305,7 @@ function Copy-TessaSolutionPart{
         [string] $SolutionPartRelativeFolder,
         [string] $ModelFolder,
         [string] $DeploySectionSubsection,
+        [string] $DeployJsonsPath,
         [string] $DeploySettings
     )
     if (Test-Path $ModelFolder){
@@ -307,7 +315,10 @@ function Copy-TessaSolutionPart{
 
         New-EmptyFolder -FolderPath $solutionPartTargetFolder -FolderDescrition "Целевая для модели ($DeploySectionSubsection)" -Verbose
 
-        $filesToCopy=Read-TessaDeploySectionFromJson -DeploySettings $DeploySettings -Section "package" -Subsection $DeploySectionSubsection
+        $filesToCopy=Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath `
+                                                    -DeploySettings $DeploySettings `
+                                                    -Section "package" `
+                                                    -Subsection $DeploySectionSubsection
         foreach($fileToCopy in $filesToCopy){
             
             $targetPath=$solutionPartTargetFolder
@@ -333,15 +344,42 @@ function New-TessaSolutionPackage{
     <#
         .SYNOPSIS
             Подготовка архива, содержащего готовое к деплою решение Тесса (схема, карточки, представления, рабочие места, код решений)
+        .PARAMETER SolutionPackage
+            Путь и имя файла созданного пакета деплоя. Значение по умолчанию: c:\Upload\Tessa\Deploy\Package\TessaSolution.zip
+        .PARAMETER TessaFolder
+            Путь к дистрибутиву Тессы TODO похоже можно удалить
+        .PARAMETER TessaProjectRoot
+            Путь к базовой папке реального проекта (не текущего TessaUtils, а проекта с расширениями). Значение по умолчанию: ..\..\Tessa
+        .PARAMETER DeployJsonsPath
+            Путь к папке с JSON конфигами деплоя. По этому пути буду искаться файлы с именем DeploySetting и расширением JSON. Обычно - полный путь к папке Config в TessaProjectRoot. Значение по умолчанию .\Config:  
+        .PARAMETER DeploySettings
+            Имя JSON файла (без расширения) с конфигурацией деплоя. Файл будет искаться по пути DeployJsonPath. Значение по умолчанию: deploy
+        .PARAMETER Localizations
+            Флаг необходимости сохранения локализаций в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
+        .PARAMETER Scheme
+            Флаг необходимости сохранения схемы в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
+        .PARAMETER Views
+            Флаг необходимости сохранения представлений в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
+        .PARAMETER Workplaces
+            Флаг необходимости сохранения рабочих мест в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
+        .PARAMETER Types
+            Флаг необходимости сохранения типов карточек в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
+        .PARAMETER Cards
+            Флаг необходимости сохранения карточек в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
+        .PARAMETER TessaClient
+            Флаг необходимости сохранения кода кастомизаций клиента в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
+        .PARAMETER TessaServerExtensions
+            Флаг необходимости сохранения кода кастомизаций сервера в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
+        .PARAMETER TessaChronosExtensions
+            Флаг необходимости сохранения кода кастомизаций Хроноса в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
     #>
     [CmdletBinding()]
     param(
         [string] $SolutionPackage="$DefaultTessaPackageFolder\TessaSolution.zip",
         [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $TessaProjectRoot=$DefaultTessaProjectRoot,
-        [string] $User="admin",
-        [string] $Password="admin",
-        [string] $DeploySettings,
+        [string] $DeployJsonsPath=$DefaultDeployJsonsPath,
+        [string] $DeploySettings="deploy",
         [switch] $Localizations,
         [switch] $Scheme,
         [switch] $Views,
@@ -367,50 +405,59 @@ function New-TessaSolutionPackage{
     if ($Scheme -or $all){
         Copy-TessaSolutionPart -SolutionPackageFolder $tempFolder -ModelFolder $modelFolder `
                                 -SolutionPartRelativeFolder $TessaPackageSchemePartPath `
-                                -DeploySectionSubsection "scheme" -DeploySettings $DeploySettings -Verbose
+                                -DeploySectionSubsection "scheme" `
+                                -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings -Verbose
     }
     if ($Localizations -or $all){
         Copy-TessaSolutionPart -SolutionPackageFolder $tempFolder -ModelFolder $modelFolder `
-        -SolutionPartRelativeFolder $TessaPackageLocalizationsPartPath `
-        -DeploySectionSubsection "localizations" -DeploySettings $DeploySettings -Verbose
+                                -SolutionPartRelativeFolder $TessaPackageLocalizationsPartPath `
+                                -DeploySectionSubsection "localizations" `
+                                -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings -Verbose
     }
     if ($Types -or $all){
         Copy-TessaSolutionPart -SolutionPackageFolder $tempFolder -ModelFolder $modelFolder `
                                 -SolutionPartRelativeFolder $TessaPackageTypesPartPath `
-                                -DeploySectionSubsection "types" -DeploySettings $DeploySettings -Verbose
+                                -DeploySectionSubsection "types" `
+                                -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings -Verbose
     }
     if($Cards -or $all){
         Copy-TessaSolutionPart -SolutionPackageFolder $tempFolder -ModelFolder $modelFolder `
                                 -SolutionPartRelativeFolder $TessaPackageCardsPartPath `
-                                -DeploySectionSubsection "cards" -DeploySettings $DeploySettings -Verbose
+                                -DeploySectionSubsection "cards" `
+                                -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings -Verbose
     }
     if ($Views -or $all){
         Copy-TessaSolutionPart -SolutionPackageFolder $tempFolder -ModelFolder $modelFolder `
                                 -SolutionPartRelativeFolder $TessaPackageViewsPartPath `
-                                -DeploySectionSubsection "views" -DeploySettings $DeploySettings -Verbose
+                                -DeploySectionSubsection "views" `
+                                -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings -Verbose
     }
     if ($Workplaces -or $all){
         Copy-TessaSolutionPart -SolutionPackageFolder $tempFolder -ModelFolder $modelFolder `
                                 -SolutionPartRelativeFolder $TessaPackageWorkplacesPartPath `
-                                -DeploySectionSubsection "workplaces" -DeploySettings $DeploySettings -Verbose
+                                -DeploySectionSubsection "workplaces" `
+                                -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings -Verbose
     }
 
     
     if ($TessaClient -or $all){
         $tessaClientTargetFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageClientPartPath
-        Merge-TessaClientWithExtensions -DeploySettings $DeploySettings -TessaFolder $TessaFolder `
+        Merge-TessaClientWithExtensions -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
+                    -TessaFolder $TessaFolder `
                     -TessaProjectRoot $TessaProjectRoot -TargetFolder $tessaClientTargetFolder -Verbose
     }
     
     if ($TessaServerExtensions -or $all){
         $tessaServerTargetFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageServerPartPath
-        Copy-TessaServerExtensionsPart -DeploySettings $DeploySettings -TessaProjectRoot $TessaProjectRoot `
+        Copy-TessaServerExtensionsPart  -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
+                            -TessaProjectRoot $TessaProjectRoot `
                             -TargetFolder $tessaServerTargetFolder
     }    
     
     if ($TessaChronosExtensions -or $all){
         $tessaChronosTargetFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageChronosPartPath
-        Copy-TessaChronosExtensionsPart -DeploySettings $DeploySettings -TessaProjectRoot $TessaProjectRoot `
+        Copy-TessaChronosExtensionsPart  -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
+                            -TessaProjectRoot $TessaProjectRoot `
                            -TargetFolder $tessaChronosTargetFolder
     }
     
