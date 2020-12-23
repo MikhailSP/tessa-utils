@@ -8,7 +8,11 @@
     },
     "project-base-path": {
       "type": "string",
-      "description": "Base path of the real project (not this one, but your company project of Tessa extensions)"
+      "description": "Base path of the real project (not this one, but your company project of Tessa extensions). Can be absolute or relative to MikhailSP.Tessa.Deploy.psm1 file folder"
+    },
+    "configuration-path": {
+      "type": "string",
+      "description": "Base path to the Tessa configuration folder of real project. Everything in the 'package' section of this file is relative to this 'configuration-path' folder. Can be absolute or relative to MikhailSP.Tessa.Deploy.psm1 file folder"
     },
     "client": {
       "type": "array",

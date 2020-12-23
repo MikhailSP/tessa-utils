@@ -203,6 +203,26 @@ function Read-TessaDeploySectionFromJson{
     }
 }
 
+function Read-PathFromConfig{
+    param(
+        [string] $DeployJsonsPath,
+        [string] $DeploySettings,
+        [string] $Section,
+        [string] $Subsection
+    )
+
+    $path = Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath `
+                                                    -DeploySettings $DeploySettings `
+                                                    -Section $Section `
+                                                    -Subsection $Subsection
+    
+    $pathIsRelative=$path[0] -eq '.'
+    if ($pathIsRelative){
+        $path = Join-Path -Path $PSScriptRoot -ChildPath $path
+    }
+    $path
+}
+
 function Merge-TessaClientWithExtensions{
     [CmdletBinding()]
     param(
@@ -339,8 +359,6 @@ function New-TessaSolutionPackage{
             Подготовка архива, содержащего готовое к деплою решение Тесса (схема, карточки, представления, рабочие места, код решений)
         .PARAMETER SolutionPackage
             Путь и имя файла создаваемого пакета деплоя. Значение по умолчанию: c:\Upload\Tessa\Deploy\Package\TessaSolution.zip
-        .PARAMETER TessaProjectRoot
-            Путь к базовой папке реального проекта (не текущего TessaUtils, а проекта с расширениями). Значение по умолчанию: ..\..\Tessa
         .PARAMETER DeployJsonsPath
             Путь к папке с JSON конфигами деплоя. По этому пути буду искаться файлы с именем DeploySetting и расширением JSON. Обычно - полный путь к папке Config в TessaProjectRoot. Значение по умолчанию .\Config:  
         .PARAMETER DeploySettings
@@ -381,16 +399,12 @@ function New-TessaSolutionPackage{
     )
 
     $tempFolder="$TempFolder\TessaPreparePackage"
-    $modelFolder="$TessaProjectRoot\Configuration"
 
-    $basePathJson = Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath `
-                                                    -DeploySettings $DeploySettings `
-                                                    -Section 'project-base-path'
-    
-    $tessaProjectRoot=$basePathJson
-    if ($basePathJson[0] -eq '.'){
-        $tessaProjectRoot = Join-Path -Path $PSScriptRoot -ChildPath $basePathJson
-    }
+    $tessaProjectRoot=Read-PathFromConfig -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
+                                          -Section 'project-base-path'
+
+    $modelFolder=Read-PathFromConfig -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
+                                          -Section 'configuration-path'
 
     New-EmptyFolder -FolderPath $tempFolder -FolderDescrition "Временная для пакета деплоя" -Verbose
 

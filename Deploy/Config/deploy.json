@@ -1,5 +1,6 @@
 {
-  "project-base-path": "..\\..\\..\\Tessa",
+  "project-base-path": "..\\..\\Tessa",
+  "configuration-path": "..\\..\\Tessa\\Configuration",
   "client":[
     "//Bin\\Tessa.Extensions.Client\\*.*",
     "Extensions\\Tessa.Extensions.Client\\bin\\Release\\net472\\*.dll",
