@@ -3,22 +3,22 @@
   "configuration-path": "..\\..\\Tessa\\Configuration",
   "client":[
     "//Bin\\Tessa.Extensions.Client\\*.*",
-    "Extensions\\Tessa.Extensions.Client\\bin\\Release\\net472\\*.dll",
-    "Extensions\\Tessa.Extensions.Client\\bin\\Release\\net472\\*.pdb",
-    "Extensions\\Tessa.Extensions.Client\\bin\\Release\\net472\\*.dep"
+    "Extensions\\Tessa.Extensions.Client\\bin\\Debug\\net472\\*.dll",
+    "Extensions\\Tessa.Extensions.Client\\bin\\Debug\\net472\\*.pdb",
+    "Extensions\\Tessa.Extensions.Client\\bin\\Debug\\net472\\*.dep"
   ],
   "server":[
     "//Bin\\Tessa.Extensions.Server\\*.*",
-    "Extensions\\Tessa.Extensions.Server\\bin\\Release\\netstandard2.0\\*.dll",
-    "Extensions\\Tessa.Extensions.Server\\bin\\Release\\netstandard2.0\\*.config",
-    "Extensions\\Tessa.Extensions.Server\\bin\\Release\\netstandard2.0\\*.pdb"
+    "Extensions\\Tessa.Extensions.Server\\bin\\Debug\\netstandard2.0\\*.dll",
+    "Extensions\\Tessa.Extensions.Server\\bin\\Debug\\netstandard2.0\\*.config",
+    "Extensions\\Tessa.Extensions.Server\\bin\\Debug\\netstandard2.0\\*.pdb"
   ],
   "chronos":[
-    "Extensions\\Tessa.Extensions.Chronos\\bin\\Release\\netstandard2.0\\*.dll",
-    "Extensions\\Tessa.Extensions.Chronos\\bin\\Release\\netstandard2.0\\*.pdb",
-    "Extensions\\Tessa.Extensions.Chronos\\bin\\Release\\netstandard2.0\\*.xml",
-    "Extensions\\Tessa.Extensions.Chronos\\bin\\Release\\netstandard2.0\\*.config",
-    "Extensions\\Tessa.Extensions.Chronos\\bin\\Release\\netstandard2.0\\configuration\\AbbyyContractsImport.xml"
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.dll",
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.pdb",
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.xml",
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.config",
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\configuration\\*.xml"
   ],
   "package":{
     "localizations": [
