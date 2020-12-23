@@ -1,6 +1,6 @@
 ﻿{
   "parent": "all.json",
-  "package":{
+  "configuration":{
     "localizations": [
     ],
     "views":[
