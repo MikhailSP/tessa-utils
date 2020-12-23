@@ -1,6 +1,7 @@
 ﻿$DefaultTessaDistribFolder='c:\Dev\tessa-3.5.0'
 $DefaultTessaPackageFolder="c:\Upload\Tessa\Deploy\Package"
 $DefaultTessaProjectRoot="$PSScriptRoot\..\..\Tessa"
+$DefaultDeployJsonsPath="$PSScriptRoot\..\Settings\deploy-settings"
 $TessaGitRoot="$PSScriptRoot\..\.."
 $TessaDeployJsonPath="$PSScriptRoot\Config"
 $DefaultTessaDeployJson="deploy.json"
@@ -360,9 +361,9 @@ function New-TessaSolutionPackage{
         .PARAMETER SolutionPackage
             Путь и имя файла создаваемого пакета деплоя. Значение по умолчанию: c:\Upload\Tessa\Deploy\Package\TessaSolution.zip
         .PARAMETER DeployJsonsPath
-            Путь к папке с JSON конфигами деплоя. По этому пути буду искаться файлы с именем DeploySetting и расширением JSON. Обычно - полный путь к папке Config в TessaProjectRoot. Значение по умолчанию .\Config:  
+            Путь к папке с JSON конфигами деплоя. По этому пути буду искаться файлы с именем DeploySetting и расширением JSON. Обычно - полный путь к папке Config в TessaProjectRoot. Значение по умолчанию ..\Settings\deploy-settings:  
         .PARAMETER DeploySettings
-            Имя JSON файла (без расширения) с конфигурацией деплоя. Файл будет искаться по пути DeployJsonPath. Значение по умолчанию: deploy
+            Имя JSON файла (без расширения) с конфигурацией деплоя. Файл будет искаться по пути DeployJsonPath. Значение по умолчанию: all
         .PARAMETER Localizations
             Флаг необходимости сохранения локализаций в пакет деплоя. Если ни один из флагов не установлен - в пакет попадут все части (Локализация, Схема, Код и т.д.)
         .PARAMETER Scheme
@@ -386,7 +387,7 @@ function New-TessaSolutionPackage{
     param(
         [string] $SolutionPackage="$DefaultTessaPackageFolder\TessaSolution.zip",
         [string] $DeployJsonsPath=$DefaultDeployJsonsPath,
-        [string] $DeploySettings="deploy",
+        [string] $DeploySettings="all",
         [switch] $Localizations,
         [switch] $Scheme,
         [switch] $Views,
