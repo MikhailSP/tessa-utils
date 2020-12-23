@@ -338,7 +338,7 @@ function New-TessaSolutionPackage{
         .SYNOPSIS
             Подготовка архива, содержащего готовое к деплою решение Тесса (схема, карточки, представления, рабочие места, код решений)
         .PARAMETER SolutionPackage
-            Путь и имя файла созданного пакета деплоя. Значение по умолчанию: c:\Upload\Tessa\Deploy\Package\TessaSolution.zip
+            Путь и имя файла создаваемого пакета деплоя. Значение по умолчанию: c:\Upload\Tessa\Deploy\Package\TessaSolution.zip
         .PARAMETER TessaProjectRoot
             Путь к базовой папке реального проекта (не текущего TessaUtils, а проекта с расширениями). Значение по умолчанию: ..\..\Tessa
         .PARAMETER DeployJsonsPath
@@ -367,7 +367,6 @@ function New-TessaSolutionPackage{
     [CmdletBinding()]
     param(
         [string] $SolutionPackage="$DefaultTessaPackageFolder\TessaSolution.zip",
-        [string] $TessaProjectRoot=$DefaultTessaProjectRoot,
         [string] $DeployJsonsPath=$DefaultDeployJsonsPath,
         [string] $DeploySettings="deploy",
         [switch] $Localizations,
@@ -383,6 +382,15 @@ function New-TessaSolutionPackage{
 
     $tempFolder="$TempFolder\TessaPreparePackage"
     $modelFolder="$TessaProjectRoot\Configuration"
+
+    $basePathJson = Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath `
+                                                    -DeploySettings $DeploySettings `
+                                                    -Section 'project-base-path'
+    
+    $tessaProjectRoot=$basePathJson
+    if ($basePathJson[0] -eq '.'){
+        $tessaProjectRoot = Join-Path -Path $PSScriptRoot -ChildPath $basePathJson
+    }
 
     New-EmptyFolder -FolderPath $tempFolder -FolderDescrition "Временная для пакета деплоя" -Verbose
 
@@ -433,20 +441,20 @@ function New-TessaSolutionPackage{
     if ($TessaClient -or $all){
         $tessaClientTargetFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageClientPartPath
         Merge-TessaClientWithExtensions -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
-                    -TessaProjectRoot $TessaProjectRoot -TargetFolder $tessaClientTargetFolder -Verbose
+                    -TessaProjectRoot $tessaProjectRoot -TargetFolder $tessaClientTargetFolder -Verbose
     }
     
     if ($TessaServerExtensions -or $all){
         $tessaServerTargetFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageServerPartPath
         Copy-TessaServerExtensionsPart  -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
-                            -TessaProjectRoot $TessaProjectRoot `
+                            -TessaProjectRoot $tessaProjectRoot `
                             -TargetFolder $tessaServerTargetFolder
     }    
     
     if ($TessaChronosExtensions -or $all){
         $tessaChronosTargetFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageChronosPartPath
         Copy-TessaChronosExtensionsPart  -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
-                            -TessaProjectRoot $TessaProjectRoot `
+                            -TessaProjectRoot $tessaProjectRoot `
                            -TargetFolder $tessaChronosTargetFolder
     }
     
