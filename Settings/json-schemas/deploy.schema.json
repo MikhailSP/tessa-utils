@@ -35,7 +35,7 @@
         "type": "string"
       }
     },
-    "package": {
+    "configuration": {
       "type": "object",
       "description": "Location of the Tessa configuration parts relative to 'project-base-path'",
       "properties": {

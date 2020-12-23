@@ -20,7 +20,7 @@
     "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.config",
     "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\configuration\\*.xml"
   ],
-  "package":{
+  "configuration":{
     "localizations": [
       "Localizations\\*"
     ],

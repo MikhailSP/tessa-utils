@@ -330,7 +330,7 @@ function Copy-TessaSolutionPart{
 
         $filesToCopy=Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath `
                                                     -DeploySettings $DeploySettings `
-                                                    -Section "package" `
+                                                    -Section "configuration" `
                                                     -Subsection $DeploySectionSubsection
         foreach($fileToCopy in $filesToCopy){
             
