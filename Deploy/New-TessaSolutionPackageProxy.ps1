@@ -1,6 +1,5 @@
 param(
     [string] $SolutionPackage="c:\Upload\Tessa\Deploy\Package\MontTessaSolution.zip",
-    [string] $TessaFolder="c:\Dev\tessa-3.5.0",
     [string] $DeployJsonsPath="$PSScriptRoot\Config",
     [string] $DeploySettings="deploy", 
     [switch] $Localizations,
@@ -21,7 +20,7 @@ $OutputEncoding=[Console]::OutputEncoding
 
 
 Import-Module "$PSScriptRoot\MikhailSP.Tessa.Deploy.psm1" -Force
-New-TessaSolutionPackage -SolutionPackage $SolutionPackage -TessaFolder $TessaFolder `
+New-TessaSolutionPackage -SolutionPackage $SolutionPackage `
                         -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
                         -Localizations:$Localizations -Scheme:$Scheme -Views:$Views -Workplaces:$Workplaces `
                         -Types:$Types -Cards:$Cards -TessaClient:$TessaClient `

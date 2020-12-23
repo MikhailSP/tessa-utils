@@ -206,7 +206,6 @@ function Read-TessaDeploySectionFromJson{
 function Merge-TessaClientWithExtensions{
     [CmdletBinding()]
     param(
-        [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $TessaProjectRoot,
         [string] $DeployJsonsPath,
         [string] $TargetFolder="$DefaultTessaPackageFolder\Code\TessaClient",
@@ -216,15 +215,9 @@ function Merge-TessaClientWithExtensions{
     Write-Verbose "Подготовка TessaClient для публикации в '$TargetFolder'"
 
     $tempFolder="$TempFolder\client\"
-    $tessaClient=Join-Path -Path $TessaFolder -ChildPath $TessaClientPath
-    $tessaClientFolder=Split-Path -Path $tessaClient
 
     New-EmptyFolder -FolderPath $tempFolder -FolderDescrition "Временная для TessaClient" -Verbose
-
-    # Сейчас дистрибутив собирается с таргет-сервера, т.к. нужен актуальный app.json
-    # Write-Verbose "Копирование TessaClient во временную папку из дистрибутива '$tessaClientFolder'"
-    # Copy-Item -Path "$tessaClientFolder\*" -Destination $tempFolder -Recurse -Force
-
+    
     Write-Verbose "Копирование файлов расширений клиента во временный TessaClient"
     $filesToCopy=Read-TessaDeploySectionFromJson -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
                                                 -Section "client"
@@ -346,8 +339,6 @@ function New-TessaSolutionPackage{
             Подготовка архива, содержащего готовое к деплою решение Тесса (схема, карточки, представления, рабочие места, код решений)
         .PARAMETER SolutionPackage
             Путь и имя файла созданного пакета деплоя. Значение по умолчанию: c:\Upload\Tessa\Deploy\Package\TessaSolution.zip
-        .PARAMETER TessaFolder
-            Путь к дистрибутиву Тессы TODO похоже можно удалить
         .PARAMETER TessaProjectRoot
             Путь к базовой папке реального проекта (не текущего TessaUtils, а проекта с расширениями). Значение по умолчанию: ..\..\Tessa
         .PARAMETER DeployJsonsPath
@@ -376,7 +367,6 @@ function New-TessaSolutionPackage{
     [CmdletBinding()]
     param(
         [string] $SolutionPackage="$DefaultTessaPackageFolder\TessaSolution.zip",
-        [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $TessaProjectRoot=$DefaultTessaProjectRoot,
         [string] $DeployJsonsPath=$DefaultDeployJsonsPath,
         [string] $DeploySettings="deploy",
@@ -443,7 +433,6 @@ function New-TessaSolutionPackage{
     if ($TessaClient -or $all){
         $tessaClientTargetFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageClientPartPath
         Merge-TessaClientWithExtensions -DeployJsonsPath $DeployJsonsPath -DeploySettings $DeploySettings `
-                    -TessaFolder $TessaFolder `
                     -TessaProjectRoot $TessaProjectRoot -TargetFolder $tessaClientTargetFolder -Verbose
     }
     
