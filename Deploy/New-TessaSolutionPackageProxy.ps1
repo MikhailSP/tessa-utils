@@ -21,7 +21,7 @@ $OutputEncoding = [Text.UTF8Encoding]::UTF8
 $OutputEncoding=[Console]::OutputEncoding
 
 
-Import-Module "$PSScriptRoot\Mont.Tessa.psm1" -Force
+Import-Module "$PSScriptRoot\MikhailSP.Tessa.Deploy.psm1" -Force
 New-TessaSolutionPackage -SolutionPackage $SolutionPackage -TessaFolder $TessaFolder `
                         -User $User -Password $Password -DeploySettings $DeploySettings `
                         -Localizations:$Localizations -Scheme:$Scheme -Views:$Views -Workplaces:$Workplaces `

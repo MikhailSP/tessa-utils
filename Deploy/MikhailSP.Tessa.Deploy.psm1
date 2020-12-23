@@ -295,7 +295,6 @@ function Copy-TessaSolutionPart{
         [string] $DeploySectionSubsection,
         [string] $DeploySettings
     )
-
     if (Test-Path $ModelFolder){
         $solutionPartTargetFolder=Join-Path -Path $SolutionPackageFolder -ChildPath $SolutionPartRelativeFolder
         Write-Verbose "Копирование данных из секции $DeploySectionSubsection в $solutionPartTargetFolder"

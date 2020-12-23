@@ -23,7 +23,7 @@ param(
 #$OutputEncoding = [Text.UTF8Encoding]::UTF8
 #$OutputEncoding=[Console]::OutputEncoding
 
-Import-Module "$PSScriptRoot\Mont.Tessa.psm1" -Force
+Import-Module "$PSScriptRoot\MikhailSP.Tessa.Deploy.psm1" -Force
 
 $localizations=ConvertTo-BooleanTfsValue -Name "LocalizationsStr" -StringValue $LocalizationsStr -Verbose
 $scheme=ConvertTo-BooleanTfsValue -Name "SchemeStr" -StringValue $SchemeStr -Verbose
