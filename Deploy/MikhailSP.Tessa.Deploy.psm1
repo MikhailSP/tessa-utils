@@ -263,7 +263,7 @@ function Copy-TessaChronosExtensionsPart{
     #>
     [CmdletBinding()]
     param(
-        [string] $TargetFolder="$DefaultTessaPackageFolder\Code\TessaServer",
+        [string] $TargetFolder="$DefaultTessaPackageFolder\Code\Chronos",
         [string] $DeploySettings
     )
 
