@@ -1,0 +1,44 @@
+{
+  "project-base-path": "..\\..\\Tessa",
+  "configuration-path": "..\\..\\Tessa\\Configuration",
+  "client":[
+    "//Bin\\Tessa.Extensions.Client\\*.*",
+    "Extensions\\Tessa.Extensions.Client\\bin\\Debug\\net472\\*.dll",
+    "Extensions\\Tessa.Extensions.Client\\bin\\Debug\\net472\\*.pdb",
+    "Extensions\\Tessa.Extensions.Client\\bin\\Debug\\net472\\*.dep"
+  ],
+  "server":[
+    "//Bin\\Tessa.Extensions.Server\\*.*",
+    "Extensions\\Tessa.Extensions.Server\\bin\\Debug\\netstandard2.0\\*.dll",
+    "Extensions\\Tessa.Extensions.Server\\bin\\Debug\\netstandard2.0\\*.config",
+    "Extensions\\Tessa.Extensions.Server\\bin\\Debug\\netstandard2.0\\*.pdb"
+  ],
+  "chronos":[
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.dll",
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.pdb",
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.xml",
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\*.config",
+    "Extensions\\Tessa.Extensions.Chronos\\bin\\Debug\\netstandard2.0\\configuration\\*.xml"
+  ],
+  "configuration":{
+    "localizations": [
+      "Localizations\\*"
+    ],
+    "scheme":[
+      "Scheme\\Functions",
+      "Scheme\\Migrations",
+      "Scheme\\Partitions",
+      "Scheme\\Procedures",
+      "Scheme\\Tables",
+      "Scheme\\Tessa.tsd"
+    ],
+    "views":["Views\\*"],
+    "workplaces":["Workplaces\\*"],
+    "types":[
+      "Types\\Cards",
+      "Types\\Files",
+      "Types\\Tasks"
+    ],
+    "cards": ["Cards\\*"]
+  }
+}

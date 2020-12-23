@@ -3,6 +3,21 @@
   <component name="JsonSchemaMappingsProjectConfiguration">
     <state>
       <map>
+        <entry key="deploy.schema">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="deploy.schema" />
+              <option name="relativePathToSchema" value="Settings/json-schemas/deploy.schema.json" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="path" value="Deploy/Config/deploy.json" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
         <entry key="environment.schema">
           <value>
             <SchemaInfo>

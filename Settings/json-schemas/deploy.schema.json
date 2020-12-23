@@ -1,0 +1,87 @@
+﻿{
+  "$schema": "https://github.com/MikhailSP/tessa-utils/deploy/schema#",
+  "type": "object",
+  "properties": {
+    "parent": {
+      "type": "string",
+      "description": "Parent JSON schema, some parts of which could be overriden by current JSON. Value is the name of the parent JSON file in the same folder without extension. For example 'deploy'"
+    },
+    "project-base-path": {
+      "type": "string",
+      "description": "Base path of the real project (not this one, but your company project of Tessa extensions). Can be absolute or relative to MikhailSP.Tessa.Deploy.psm1 file folder"
+    },
+    "configuration-path": {
+      "type": "string",
+      "description": "Base path to the Tessa configuration folder of real project. Everything in the 'package' section of this file is relative to this 'configuration-path' folder. Can be absolute or relative to MikhailSP.Tessa.Deploy.psm1 file folder"
+    },
+    "client": {
+      "type": "array",
+      "description": "List of file patterns. These files will be copied to Tessa Client. Elements started with '//' will be ignored.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "server": {
+      "type": "array",
+      "description": "List of file patterns. These files will be copied to Tessa Server. Elements started with '//' will be ignored.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "chronos": {
+      "type": "array",
+      "description": "List of file patterns. These files will be copied to Tessa Chronos in additions to patterns from 'server' part. Elements started with '//' will be ignored.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "description": "Location of the Tessa configuration parts relative to 'project-base-path'",
+      "properties": {
+        "localizations": {
+          "type": "array",
+          "description": "Path patterns for Tessa Localization files exported using TessaAdmin. Elements started with '//' will be ignored.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scheme": {
+          "type": "array",
+          "description": "Path patterns for Tessa Scheme files exported using TessaAdmin. Elements started with '//' will be ignored.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "views": {
+          "type": "array",
+          "description": "Path patterns for Tessa View files exported using TessaAdmin. Elements started with '//' will be ignored.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workplaces": {
+          "type": "array",
+          "description": "Path patterns for Tessa Workplace files exported using TessaAdmin. Elements started with '//' will be ignored.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "types": {
+          "type": "array",
+          "description": "Path patterns for Tessa Card Types files exported using TessaAdmin. Elements started with '//' will be ignored.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cards": {
+          "type": "array",
+          "description": "Path patterns for Tessa Cards (content) files exported using TessaAdmin. Elements started with '//' will be ignored.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

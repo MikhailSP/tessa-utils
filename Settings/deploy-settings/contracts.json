@@ -1,0 +1,34 @@
+﻿{
+  "parent": "all.json",
+  "configuration":{
+    "localizations": [
+    ],
+    "views":[
+      "Views\\MyClientContracts.view",
+      "Views\\MySupplierContracts.view"
+    ],
+    "workplaces":[
+      "Workplaces\\User.workplace",
+      "Workplaces\\Archive.workplace"
+    ],
+    "types":[
+      "Types\\Cards\\Договорные документы\\MyContract.jtype"
+    ],
+    "cards": [
+      "Cards\\Access rules\\Договорной документ*",
+      "Cards\\Document types\\Договор.jcard",
+      "Cards\\Document types\\Доп. соглашение.jcard",
+      "Cards\\Document types\\Приложение.jcard",
+      "Cards\\Document types\\Соглашение.jcard",
+      "Cards\\Roles\\Context\\Договорной документ*",
+      "Cards\\Roles\\Static\\Администратор архива*",
+      "Cards\\Roles\\Static\\Просмотр списка договорных документов*",
+      "Cards\\Roles\\Static\\Просмотр всех договорных документов*",
+      "Cards\\Roles\\Static\\Создатель договорного документа*",
+      "Cards\\KrProcess\\Дерегистрация (Договорной документ)*",
+      "Cards\\KrProcess\\Зарегистрировать документ (Договорной документ)*",
+      "Cards\\KrProcess\\Отменить регистрацию (Договорной документ)*",
+      "Cards\\KrProcess\\Регистрация (Договорной документ)*"
+    ]
+  }
+}
