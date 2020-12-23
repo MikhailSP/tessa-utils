@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string] $SolutionPackage="c:\Upload\Tessa\Deploy\Package\MontTessaSolution.zip",
     [string] $DeployJsonsPath="$PSScriptRoot\..\Settings\deploy-settings",
     [string] $DeploySettings="all", 
