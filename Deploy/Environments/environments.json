@@ -1,0 +1,30 @@
+{
+  "defaults": {
+    "distrib": {
+      "base-path": "c:\\Dev\\tessa-3.5.0"
+    },
+    "server": {
+      "path": "c:\\inetpub\\wwwroot\\tessa\\web",
+      "pool-name": "TessaPool",
+      "url": "https://localhost/tessa"
+    },
+    "chronos": {
+      "path": "c:\\Tessa\\Chronos",
+      "service-name": "Syntellect Chronos"
+    }
+  },
+  "tessa-tst": {
+    
+  },
+  "tessa-tr": {
+    "server": {
+      "path": "C:\\inetpub\\wwwroot\\Tessa-TR\\web",
+      "pool-name": "tessa-TR",
+      "url": "https://localhost/Tessa-TR"
+    },
+    "chronos": {
+      "path": "c:\\Tessa\\Chronos-TR",
+      "service-name": "Syntellect Chronos-TR"
+    }
+  }
+}
