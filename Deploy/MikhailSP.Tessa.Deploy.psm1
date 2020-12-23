@@ -1,4 +1,5 @@
-﻿
+﻿$DefaultTessaDistribFolder='c:\Dev\tessa-3.5.0'
+$DefaultTessaPackageFolder="c:\Upload\Tessa\Deploy\Package"
 $TessaGitRoot="$PSScriptRoot\..\.."
 $TessaDeployJsonPath="$PSScriptRoot\Config"
 $DefaultTessaDeployJson="deploy.json"
@@ -128,7 +129,7 @@ function Start-TessaApplicationAndTestResult{
 
 function Start-Tadmin{
     param(
-        [string] $TessaFolder="c:\Dev\tessa-3.5.0",
+        [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $ArgumentList="",
         [string] $ActionTitle
     )
@@ -139,7 +140,7 @@ function Start-Tadmin{
 
 function Start-TessaClient{
     param(
-        [string] $TessaFolder="c:\Dev\tessa-3.5.0",
+        [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $ArgumentList="",
         [string] $ActionTitle
     )
@@ -150,7 +151,7 @@ function Start-TessaClient{
 
 function Start-TessaAdmin{
     param(
-        [string] $TessaFolder="c:\Dev\tessa-3.5.0",
+        [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $ArgumentList="",
         [string] $ActionTitle
     )
@@ -203,8 +204,8 @@ function Read-TessaDeploySectionFromJson{
 function Merge-TessaClientWithExtensions{
     [CmdletBinding()]
     param(
-        [string] $TessaFolder="c:\Dev\tessa-3.5.0",
-        [string] $TargetFolder="c:\Upload\Tessa\Deploy\Package\Code\TessaClient",
+        [string] $TessaFolder=$DefaultTessaDistribFolder,
+        [string] $TargetFolder="$DefaultTessaPackageFolder\Code\TessaClient",
         [string] $DeploySettings
     )
 
@@ -240,7 +241,7 @@ function Copy-TessaServerExtensionsPart{
     #>
     [CmdletBinding()]
     param(
-        [string] $TargetFolder="c:\Upload\Tessa\Deploy\Package\Code\TessaServer",
+        [string] $TargetFolder="$DefaultTessaPackageFolder\Code\TessaServer",
         [string] $DeploySettings
     )
 
@@ -262,7 +263,7 @@ function Copy-TessaChronosExtensionsPart{
     #>
     [CmdletBinding()]
     param(
-        [string] $TargetFolder="c:\Upload\Tessa\Deploy\Package\Code\TessaServer",
+        [string] $TargetFolder="$DefaultTessaPackageFolder\Code\TessaServer",
         [string] $DeploySettings
     )
 
@@ -331,8 +332,8 @@ function New-TessaSolutionPackage{
     #>
     [CmdletBinding()]
     param(
-        [string] $SolutionPackage="c:\Upload\Tessa\Deploy\Package\MontTessaSolution.zip",
-        [string] $TessaFolder="c:\Dev\tessa-3.5.0",
+        [string] $SolutionPackage="$DefaultTessaPackageFolder\MontTessaSolution.zip",
+        [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $ModelFolder="$TessaGitRoot\Configuration",
         [string] $User="admin",
         [string] $Password="admin",
@@ -427,8 +428,8 @@ function Install-TessaSolutionPackage {
     #>
     [CmdletBinding()]
     param(
-        [string] $SolutionPackage="c:\Upload\Tessa\Deploy\Package\MontTessaSolution.zip",
-        [string] $TessaFolder="c:\Dev\tessa-3.5.0",
+        [string] $SolutionPackage="$DefaultTessaPackageFolder\MontTessaSolution.zip",
+        [string] $TessaFolder=$DefaultTessaDistribFolder,
         [string] $TessaServerFolder="c:\inetpub\wwwroot\tessa\web",
         [string] $TessaServerUrl="https://localhost/tessa",
         [string] $TessaChronosFolder="c:\Tessa\Chronos",
