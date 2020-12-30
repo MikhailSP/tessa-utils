@@ -200,6 +200,9 @@
             "folder": {
               "type": "string"
             },
+            "service-name": {
+              "type": "string"
+            },
             "cluster": {
               "type": "object",
               "properties": {

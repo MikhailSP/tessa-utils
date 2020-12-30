@@ -50,6 +50,7 @@
     "chronos": {
       "disabled": false,
       "folder" : "c:\\Tessa\\Chronos",
+      "service-name": "Syntellect Chronos",
       "cluster": {
         "disabled": false,
         "name": "tessa-dev-chr"

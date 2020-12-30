@@ -47,11 +47,7 @@ Merge-Jsons -source $jsonContent.$machine -target $environment
 $TessaPoolName = $environment.server."pool-name"
 Write-Verbose "TessaPoolName = '$TessaPoolName'"
 
-$TessaChronosServiceName = $environment.chronos."service-name"
-Write-Verbose "TessaChronosServiceName = '$TessaChronosServiceName'"
-
 Install-TessaSolutionPackage -SolutionPackage $SolutionPackage `
-                        -TessaChronosServiceName $TessaChronosServiceName `
                         -User $User -Password $Password `
                         -Localizations:$localizations -Scheme:$scheme -Views:$Views `
                         -Workplaces:$workplaces -Types:$types -Cards:$cards `

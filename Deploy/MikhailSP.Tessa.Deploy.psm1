@@ -507,7 +507,6 @@ function Install-TessaSolutionPackage {
         [string] $NodeName="main",
         [string] $InstallSettingsJsonPath=$DefaultInstallSettingsJsonPath,
         
-        [string] $TessaChronosServiceName="Syntellect Chronos",
         [string] $User="admin",
         [string] $Password="admin",
         [switch] $Localizations,
@@ -664,14 +663,14 @@ function Install-TessaSolutionPackage {
         }
         Write-Verbose "Папка Chronos указана корректно"
 
-        Write-Verbose "Останавливаем сервис '$TessaChronosServiceName' для копирования файлов"
-        Stop-Service -Name $TessaChronosServiceName
+        Write-Verbose "Останавливаем сервис '$($settings.Chronos.ServiceName)' для копирования файлов"
+        Stop-Service -Name $settings.Chronos.ServiceName
 
         Copy-Item -Path "$tempFolder\$TessaPackageServerPartPath\*" -Destination "$($settings.Chronos.Folder)\extensions" -Force
         Copy-Item -Path "$tempFolder\$TessaPackageChronosPartPath\*" -Destination "$($settings.Chronos.Folder)\Plugins\Tessa.Extensions.Chronos" -Force
         
-        Write-Verbose "Запускаем сервис '$TessaChronosServiceName' после копирования файлов"
-        Start-Service -Name $TessaChronosServiceName
+        Write-Verbose "Запускаем сервис '$($settings.Chronos.ServiceName)' после копирования файлов"
+        Start-Service -Name $settings.Chronos.ServiceName
     }
     
     if (!$NoAutoClean){

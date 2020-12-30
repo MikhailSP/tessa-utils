@@ -10,6 +10,7 @@ class Web
 class Chronos
 {
     [string] $Folder
+    [string] $ServiceName
 }
 
 class Node
@@ -91,6 +92,8 @@ function Get-InstallSettings{
     $settings.Chronos=[Chronos]::new()
     $settings.Chronos.Folder=Get-ValueOrExitIfNull -Json $installSettingsJson -FileName $InstallSettingsJsonPath `
                                     -Property "roles.chronos.folder"
+    $settings.Chronos.ServiceName=Get-ValueOrExitIfNull -Json $installSettingsJson -FileName $InstallSettingsJsonPath `
+                                    -Property "roles.chronos.service-name"
 
     $settings.Environment=[Environment]::new()
     $settings.Environment.Name = Get-ValueOrExitIfNull -Json $environmentJson -FileName $environmentFile `
