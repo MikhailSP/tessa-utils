@@ -1,7 +1,7 @@
 ﻿{
   "name": "Production",
   "description": "Production Tessa, two Web nodes and two Chronos nodes",
-  
+  "url": "https://tessa/tessa",
   "nodes": [
     {
       "name": "web-n1",

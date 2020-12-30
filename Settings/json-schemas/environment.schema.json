@@ -225,6 +225,9 @@
     "description": {
       "type": "string"
     },
+    "url": {
+      "type": "string"
+    },
     "nodes": {
       "type": "array",
       "items": {
@@ -257,6 +260,7 @@
   "required": [
     "name",
     "description",
+    "url",
     "nodes",
     "install-settings",
     "app.json"

@@ -24,6 +24,7 @@ class Environment
 {
     [string] $Name
     [string] $Description
+    [string] $Url
     [Node[]] $Nodes
     [Node] $CurrentNode
 }
@@ -96,6 +97,8 @@ function Get-InstallSettings{
                                     -Property "name"
     $settings.Environment.Description = Get-ValueOrExitIfNull -Json $environmentJson -FileName $environmentFile `
                                     -Property "description"
+    $settings.Environment.Url = Get-ValueOrExitIfNull -Json $environmentJson -FileName $environmentFile `
+                                    -Property "url"
     $settings.Environment.Nodes=@()
     
     $nodes=Get-ValueOrExitIfNull -Json $environmentJson -FileName $environmentFile `

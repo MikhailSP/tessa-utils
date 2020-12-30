@@ -507,7 +507,6 @@ function Install-TessaSolutionPackage {
         [string] $NodeName="main",
         [string] $InstallSettingsJsonPath=$DefaultInstallSettingsJsonPath,
         
-        [string] $TessaServerUrl="https://localhost/tessa",
         [string] $TessaChronosServiceName="Syntellect Chronos",
         [string] $User="admin",
         [string] $Password="admin",
@@ -543,7 +542,7 @@ function Install-TessaSolutionPackage {
     $cardsFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageCardsPartPath
     $tessaClientPublishFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageClientPartPath
     
-    $credentialsArg="/u:$User /p:$Password /a:$TessaServerUrl"
+    $credentialsArg="/u:$User /p:$Password /a:$(settings.Environment.Url)"
     
     $all=!$Scheme -and !$Views -and !$Workplaces -and !$Types -and !$Cards `
                    -and !$TessaClient -and !$TessaServerExtensions -and !$TessaChronosExtensions

@@ -1,6 +1,7 @@
 ﻿{
   "name": "Dev",
   "description": "Development Tessa, all roles on the same machine",
+  "url": "https://localhost/tessa",
   
   "nodes": [
     {
