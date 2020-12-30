@@ -1,7 +1,12 @@
-﻿$DefaultTessaDistribFolder='c:\Dev\tessa-3.5.0'
+﻿Import-Module "$PSScriptRoot\MikhailSP.Tessa.Deploy.Settings.psm1" -Force -Verbose
+
+
+$DefaultTessaDistribFolder='c:\Dev\tessa-3.5.0'
 $DefaultTessaPackageFolder="c:\Upload\Tessa\Deploy\Package"
 $DefaultTessaProjectRoot="$PSScriptRoot\..\..\Tessa"
 $DefaultDeployJsonsPath="$PSScriptRoot\..\Settings\deploy-settings"
+$DefaultEnvironmentJsonsPath="$PSScriptRoot\..\Settings\environments"
+$DefaultInstallSettingsJsonPath="$PSScriptRoot\..\Settings\install-settings\install-settings.json"
 $TessaGitRoot="$PSScriptRoot\..\.."
 $TessaDeployJsonPath="$PSScriptRoot\Config"
 $DefaultTessaDeployJson="deploy.json"
@@ -496,11 +501,14 @@ function Install-TessaSolutionPackage {
     [CmdletBinding()]
     param(
         [string] $SolutionPackage="$DefaultTessaPackageFolder\TessaSolution.zip",
-        [string] $TessaFolder=$DefaultTessaDistribFolder,
+
+        [string] $EnvironmentJsonsPath=$DefaultEnvironmentJsonsPath,
+        [string] $EnvironmentName="dev",
+        [string] $NodeName="main",
+        [string] $InstallSettingsJsonPath=$DefaultInstallSettingsJsonPath,
+        
         [string] $TessaServerFolder="c:\inetpub\wwwroot\tessa\web",
         [string] $TessaServerUrl="https://localhost/tessa",
-        [string] $TessaChronosFolder="c:\Tessa\Chronos",
-        [string] $TessaPoolName="TessaPool",
         [string] $TessaChronosServiceName="Syntellect Chronos",
         [string] $User="admin",
         [string] $Password="admin",
@@ -516,13 +524,15 @@ function Install-TessaSolutionPackage {
         [switch] $NoAutoClean
     )
     
-    $tempFolder="$TempFolder\TessaDeployPackage";
-
+    $settings=Get-InstallSettings -EnvironmentJsonsPath $EnvironmentJsonsPath -EnvironmentName $EnvironmentName `
+                        -NodeName $NodeName -InstallSettingsJsonPath $InstallSettingsJsonPath -Verbose
+    
+    $tempFolder=$settings.TempFolder
     New-EmptyFolder -FolderPath $tempFolder -FolderDescrition "Временная для пакета деплоя" -Verbose
 
     Write-Verbose "Распаковка архива '$SolutionPackage' в папку '$tempFolder'"
     Expand-Archive -Path $SolutionPackage -DestinationPath $tempFolder
-    
+
     $localizationsFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageLocalizationsPartPath
     $schemesFile=Join-Path -Path $tempFolder -ChildPath $TessaPackageSchemePartPath
     $viewsFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageViewsPartPath
@@ -545,22 +555,22 @@ function Install-TessaSolutionPackage {
     if ($all -or $Localizations){
         Write-Verbose "Деплоим локализации"
         if (Test-Path -Path "$localizationsFolder\*"){
-            Start-Tadmin -TessaFolder $TessaFolder -ArgumentList "ImportLocalization $localizationsFolder $credentialsArg" -ActionTitle "Импорт локализаций"
+            Start-Tadmin -TessaFolder $settings.TessaDistrib -ArgumentList "ImportLocalization $localizationsFolder $credentialsArg" -ActionTitle "Импорт локализаций"
         } else {
             Write-Verbose "Нет файлов локализации. Пропускаем шаг."
         }
     }    
     if ($all -or $Scheme){
         Write-Verbose "Деплоим схему"
-        Start-Tadmin -TessaFolder $TessaFolder -ArgumentList "ImportScheme $schemesFile $credentialsArg" -ActionTitle "Импорт схемы"
+        Start-Tadmin -TessaFolder $settings.TessaDistrib -ArgumentList "ImportScheme $schemesFile $credentialsArg" -ActionTitle "Импорт схемы"
     }
     if ($all -or $Views){
         Write-Verbose "Деплоим представления"
-        Start-Tadmin -TessaFolder $TessaFolder -ArgumentList "ImportViews $viewsFolder $credentialsArg" -ActionTitle "Импорт представлений"
+        Start-Tadmin -TessaFolder $settings.TessaDistrib -ArgumentList "ImportViews $viewsFolder $credentialsArg" -ActionTitle "Импорт представлений"
     }
     if ($all -or $Workplaces){
         Write-Verbose "Деплоим рабочие места"
-        Start-Tadmin -TessaFolder $TessaFolder -ArgumentList "ImportWorkplaces $workplacesFolder $credentialsArg" -ActionTitle "Импорт рабочих мест"
+        Start-Tadmin -TessaFolder $settings.TessaDistrib -ArgumentList "ImportWorkplaces $workplacesFolder $credentialsArg" -ActionTitle "Импорт рабочих мест"
     }
     if ($all -or $Types){
         Write-Verbose "Деплоим типы (карточки)"
@@ -570,7 +580,7 @@ function Install-TessaSolutionPackage {
         }
         foreach($cardDir in $cardDirs){
             Write-Verbose "Деплоим типы (карточки) группы '$($cardDir.Name)'"
-            Start-Tadmin -TessaFolder $TessaFolder -ArgumentList "ImportTypes `"$($cardDir.FullName)`" $credentialsArg" -ActionTitle "Импорт типов (карточек) группы '$($cardDir.Name)'"
+            Start-Tadmin -TessaFolder $settings.TessaDistrib -ArgumentList "ImportTypes `"$($cardDir.FullName)`" $credentialsArg" -ActionTitle "Импорт типов (карточек) группы '$($cardDir.Name)'"
         }
     }
     if ($all -or $Cards){
@@ -588,12 +598,12 @@ function Install-TessaSolutionPackage {
                 continue
             }
             Write-Verbose "Деплоим карточки (контент) группы '$($cardsPath.Name)' ($numberOfFiles)"
-            Start-Tadmin -TessaFolder $TessaFolder -ArgumentList "ImportCards `"$($cardsPath.FullName)`" $credentialsArg /e" -ActionTitle "Импорт карточек группы '$($cardsPath.Name)'"
+            Start-Tadmin -TessaFolder $settings.TessaDistrib -ArgumentList "ImportCards `"$($cardsPath.FullName)`" $credentialsArg /e" -ActionTitle "Импорт карточек группы '$($cardsPath.Name)'"
         }
     }
     if ($all -or $TessaClient)
     {
-        $tessaClientDistribFolder = Join-Path -Path $TessaFolder -ChildPath $TessaClientRelativeFolder
+        $tessaClientDistribFolder = Join-Path -Path $settings.TessaDistrib -ChildPath $TessaClientRelativeFolder
         $fileShouldExistIfClient=Join-Path -Path $tessaClientDistribFolder -ChildPath $FileToBeSureCorrectTessaClientFolder
         if (!(Test-Path $fileShouldExistIfClient)){
             Write-Error "Некорректная папка дистрибутива TessaClient '$tessaClientDistribFolder'"
@@ -627,8 +637,8 @@ function Install-TessaSolutionPackage {
 
         Import-Module WebAdministration -Force
 
-        Write-Verbose "Останавливаем пул '$TessaPoolName' для копирования файлов"
-        Stop-WebAppPool -Name $TessaPoolName -Passthru
+        Write-Verbose "Останавливаем пул '$($settings.Web.PoolName)' для копирования файлов"
+        Stop-WebAppPool -Name $settings.Web.PoolName -Passthru
         
         $waitCounter=0;
         do
@@ -637,21 +647,21 @@ function Install-TessaSolutionPackage {
             $waitCounter=$waitCounter+1
             if ($waitCounter -ge 30)
             {
-                Write-Error "Не получилось остановить '$TessaPoolName'"
+                Write-Error "Не получилось остановить '$($settings.Web.PoolName)'"
                 exit -1
             }
-            $poolState=(Get-WebAppPoolState -Name $TessaPoolName).Value
+            $poolState=(Get-WebAppPoolState -Name $settings.Web.PoolName).Value
         } while ($poolState -ne "Stopped")
-        Write-Verbose "Пул '$TessaPoolName' успешно остановлен"
+        Write-Verbose "Пул '$($settings.Web.PoolName)' успешно остановлен"
         Copy-Item -Path "$tempFolder\$TessaPackageServerPartPath\*" -Destination "$TessaServerFolder" -Force
-        Start-WebAppPool -Name $TessaPoolName -Passthru
-        Write-Verbose "Запускаем пул '$TessaPoolName' после копирования файлов"
+        Start-WebAppPool -Name $settings.Web.PoolName -Passthru
+        Write-Verbose "Запускаем пул '$($settings.Web.PoolName)' после копирования файлов"
     }
     
     if ($all -or $TessaChronosExtensions){
-        $fileShouldExistIfServer=Join-Path -Path $TessaChronosFolder -ChildPath $FileToBeSureCorrectTessaChronosFolder
+        $fileShouldExistIfServer=Join-Path -Path $settings.Chronos.Folder -ChildPath $FileToBeSureCorrectTessaChronosFolder
         if (!(Test-Path $fileShouldExistIfServer)){
-            Write-Error "Некорректная папка Chronos '$TessaChronosFolder'"
+            Write-Error "Некорректная папка Chronos '$($settings.Chronos.Folder)'"
             exit -1
         }
         Write-Verbose "Папка Chronos указана корректно"
@@ -659,8 +669,8 @@ function Install-TessaSolutionPackage {
         Write-Verbose "Останавливаем сервис '$TessaChronosServiceName' для копирования файлов"
         Stop-Service -Name $TessaChronosServiceName
 
-        Copy-Item -Path "$tempFolder\$TessaPackageServerPartPath\*" -Destination "$TessaChronosFolder\extensions" -Force
-        Copy-Item -Path "$tempFolder\$TessaPackageChronosPartPath\*" -Destination "$TessaChronosFolder\Plugins\Tessa.Extensions.Chronos" -Force
+        Copy-Item -Path "$tempFolder\$TessaPackageServerPartPath\*" -Destination "$($settings.Chronos.Folder)\extensions" -Force
+        Copy-Item -Path "$tempFolder\$TessaPackageChronosPartPath\*" -Destination "$($settings.Chronos.Folder)\Plugins\Tessa.Extensions.Chronos" -Force
         
         Write-Verbose "Запускаем сервис '$TessaChronosServiceName' после копирования файлов"
         Start-Service -Name $TessaChronosServiceName

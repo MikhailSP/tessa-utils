@@ -2,9 +2,7 @@
 param(
     [string] $SolutionPackage="c:\Upload\Tessa\Deploy\Package\MontTessaSolution.zip",
     [string] $MachineToDeploy="TESSA-DEV",
-    [string] $TessaFolder="c:\Dev\tessa-3.5.0",
     [string] $TessaServerFolder="c:\inetpub\wwwroot\tessa\web",
-    [string] $TessaPoolName="TessaPool",
     [string] $User="admin",
     [string] $Password="admin",
     [string] $LocalizationsStr,
@@ -65,9 +63,9 @@ Write-Verbose "TessaChronosFolder = '$TessaChronosFolder'"
 $TessaChronosServiceName = $environment.chronos."service-name"
 Write-Verbose "TessaChronosServiceName = '$TessaChronosServiceName'"
 
-Install-TessaSolutionPackage -SolutionPackage $SolutionPackage -TessaFolder $TessaFolder `
-                        -TessaServerFolder $TessaServerFolder -TessaPoolName $TessaPoolName -TessaServerUrl $TessaServerUrl `
-                        -TessaChronosFolder $TessaChronosFolder -TessaChronosServiceName $TessaChronosServiceName `
+Install-TessaSolutionPackage -SolutionPackage $SolutionPackage `
+                        -TessaServerFolder $TessaServerFolder -TessaServerUrl $TessaServerUrl `
+                        -TessaChronosServiceName $TessaChronosServiceName `
                         -User $User -Password $Password `
                         -Localizations:$localizations -Scheme:$scheme -Views:$Views `
                         -Workplaces:$workplaces -Types:$types -Cards:$cards `
