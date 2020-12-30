@@ -6,6 +6,7 @@
     {
       "name": "main",
       "description": "Main and the only node",
+      "deploy-configuration": true,
       "roles": [
         "web",
         "chronos",
@@ -18,6 +19,7 @@
     "roles": {
       "web": {
         "iis": {
+          "pool-name" : "Tessa!!!",
           "pool-account": "mont\\tessa-dev",
           "pool-account-password": "REPLACE_WITH_REAL_PASSWORD"
         }
