@@ -507,7 +507,6 @@ function Install-TessaSolutionPackage {
         [string] $NodeName="main",
         [string] $InstallSettingsJsonPath=$DefaultInstallSettingsJsonPath,
         
-        [string] $TessaServerFolder="c:\inetpub\wwwroot\tessa\web",
         [string] $TessaServerUrl="https://localhost/tessa",
         [string] $TessaChronosServiceName="Syntellect Chronos",
         [string] $User="admin",
@@ -628,9 +627,9 @@ function Install-TessaSolutionPackage {
     }
     
     if ($all -or $TessaServerExtensions){
-        $fileShouldExistIfServer=Join-Path -Path $TessaServerFolder -ChildPath $FileToBeSureCorrectTessaServerFolder
+        $fileShouldExistIfServer=Join-Path -Path $settings.Web.Folder -ChildPath $FileToBeSureCorrectTessaServerFolder
         if (!(Test-Path $fileShouldExistIfServer)){
-            Write-Error "Некорректная папка сервера '$TessaServerFolder'"
+            Write-Error "Некорректная папка сервера '$($settings.Web.Folder)'"
             exit -1
         }
         Write-Verbose "Папка сервера указана корректно"
@@ -653,7 +652,7 @@ function Install-TessaSolutionPackage {
             $poolState=(Get-WebAppPoolState -Name $settings.Web.PoolName).Value
         } while ($poolState -ne "Stopped")
         Write-Verbose "Пул '$($settings.Web.PoolName)' успешно остановлен"
-        Copy-Item -Path "$tempFolder\$TessaPackageServerPartPath\*" -Destination "$TessaServerFolder" -Force
+        Copy-Item -Path "$tempFolder\$TessaPackageServerPartPath\*" -Destination $settings.Web.Folder -Force
         Start-WebAppPool -Name $settings.Web.PoolName -Passthru
         Write-Verbose "Запускаем пул '$($settings.Web.PoolName)' после копирования файлов"
     }

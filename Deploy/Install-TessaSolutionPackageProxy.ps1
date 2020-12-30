@@ -2,7 +2,6 @@
 param(
     [string] $SolutionPackage="c:\Upload\Tessa\Deploy\Package\MontTessaSolution.zip",
     [string] $MachineToDeploy="TESSA-DEV",
-    [string] $TessaServerFolder="c:\inetpub\wwwroot\tessa\web",
     [string] $User="admin",
     [string] $Password="admin",
     [string] $LocalizationsStr,
@@ -45,26 +44,17 @@ $jsonContent = Get-Content "$PSScriptRoot\Environments\environments.json" | Conv
 $environment = $jsonContent.defaults
 Merge-Jsons -source $jsonContent.$machine -target $environment
 
-$TessaFolder = $environment.distrib."base-path"
-Write-Verbose "TessaFolder = '$TessaFolder'"
-
-$TessaServerFolder = $environment.server."path"
-Write-Verbose "TessaServerFolder = '$TessaServerFolder'"
-
 $TessaPoolName = $environment.server."pool-name"
 Write-Verbose "TessaPoolName = '$TessaPoolName'"
 
 $TessaServerUrl = $environment.server."url"
 Write-Verbose "TessaServerUrl = '$TessaServerUrl'"
 
-$TessaChronosFolder = $environment.chronos."path"
-Write-Verbose "TessaChronosFolder = '$TessaChronosFolder'"
-
 $TessaChronosServiceName = $environment.chronos."service-name"
 Write-Verbose "TessaChronosServiceName = '$TessaChronosServiceName'"
 
 Install-TessaSolutionPackage -SolutionPackage $SolutionPackage `
-                        -TessaServerFolder $TessaServerFolder -TessaServerUrl $TessaServerUrl `
+                        -TessaServerUrl $TessaServerUrl `
                         -TessaChronosServiceName $TessaChronosServiceName `
                         -User $User -Password $Password `
                         -Localizations:$localizations -Scheme:$scheme -Views:$Views `
