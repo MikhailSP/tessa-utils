@@ -2,8 +2,6 @@
 param(
     [string] $SolutionPackage="c:\Upload\Tessa\Deploy\Package\MontTessaSolution.zip",
     [string] $MachineToDeploy="TESSA-DEV",
-    [string] $User="admin",
-    [string] $Password="admin",
     [string] $LocalizationsStr,
     [string] $SchemeStr,
     [string] $ViewsStr,
@@ -33,22 +31,7 @@ $tessaServerExtensions=ConvertTo-BooleanTfsValue -Name "TessaServerExtensionsStr
 $tessaChronosExtensions=ConvertTo-BooleanTfsValue -Name "TessaChronosExtensionsStr" -StringValue $TessaChronosExtensionsStr -Verbose
 $noAutoClean=ConvertTo-BooleanTfsValue -Name "NoAutoCleanStr" -StringValue $NoAutoCleanStr -Verbose
 
-
-$machine = $MachineToDeploy.ToLower();
-if ($machine.IndexOf(".") -ge 1){
-    $machine=$machine.Substring(0,$machine.IndexOf("."));
-}
-Write-Verbose "Выбран конфиг для машины $machine"
-
-$jsonContent = Get-Content "$PSScriptRoot\Environments\environments.json" | ConvertFrom-Json
-$environment = $jsonContent.defaults
-Merge-Jsons -source $jsonContent.$machine -target $environment
-
-$TessaPoolName = $environment.server."pool-name"
-Write-Verbose "TessaPoolName = '$TessaPoolName'"
-
 Install-TessaSolutionPackage -SolutionPackage $SolutionPackage `
-                        -User $User -Password $Password `
                         -Localizations:$localizations -Scheme:$scheme -Views:$Views `
                         -Workplaces:$workplaces -Types:$types -Cards:$cards `
                         -TessaClient:$tessaClient -TessaServerExtensions:$tessaServerExtensions `

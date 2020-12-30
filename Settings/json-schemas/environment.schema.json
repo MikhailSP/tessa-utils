@@ -228,6 +228,21 @@
     "url": {
       "type": "string"
     },
+    "admin": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "user",
+        "password"
+      ]
+    },
     "nodes": {
       "type": "array",
       "items": {
@@ -261,6 +276,7 @@
     "name",
     "description",
     "url",
+    "admin",
     "nodes",
     "install-settings",
     "app.json"

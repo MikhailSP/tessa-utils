@@ -501,14 +501,10 @@ function Install-TessaSolutionPackage {
     [CmdletBinding()]
     param(
         [string] $SolutionPackage="$DefaultTessaPackageFolder\TessaSolution.zip",
-
         [string] $EnvironmentJsonsPath=$DefaultEnvironmentJsonsPath,
         [string] $EnvironmentName="dev",
         [string] $NodeName="main",
         [string] $InstallSettingsJsonPath=$DefaultInstallSettingsJsonPath,
-        
-        [string] $User="admin",
-        [string] $Password="admin",
         [switch] $Localizations,
         [switch] $Scheme,
         [switch] $Views,
@@ -541,7 +537,7 @@ function Install-TessaSolutionPackage {
     $cardsFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageCardsPartPath
     $tessaClientPublishFolder=Join-Path -Path $tempFolder -ChildPath $TessaPackageClientPartPath
     
-    $credentialsArg="/u:$User /p:$Password /a:$(settings.Environment.Url)"
+    $credentialsArg="/u:$($settings.Environment.Admin.User) /p:$($settings.Environment.Admin.Password) /a:$(settings.Environment.Url)"
     
     $all=!$Scheme -and !$Views -and !$Workplaces -and !$Types -and !$Cards `
                    -and !$TessaClient -and !$TessaServerExtensions -and !$TessaChronosExtensions

@@ -2,6 +2,10 @@
   "name": "Production",
   "description": "Production Tessa, two Web nodes and two Chronos nodes",
   "url": "https://tessa/tessa",
+  "admin": {
+    "user": "admin",
+    "password": "admin"
+  },
   "nodes": [
     {
       "name": "web-n1",

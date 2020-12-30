@@ -1,5 +1,9 @@
 ﻿Import-Module "$PSScriptRoot\..\Install\MikhailSP.Json.Utils.psm1" -Force -Verbose
 
+class Account{
+    [string] $User
+    [string] $Password
+}
 
 class Web
 {
@@ -26,6 +30,7 @@ class Environment
     [string] $Name
     [string] $Description
     [string] $Url
+    [Account] $Admin
     [Node[]] $Nodes
     [Node] $CurrentNode
 }
@@ -82,7 +87,7 @@ function Get-InstallSettings{
     
     $settings.TessaDistrib=Get-ValueOrExitIfNull -Json $installSettingsJson -FileName $InstallSettingsJsonPath `
                                     -Property "roles.common.paths.tessa-distrib"
-
+    
     $settings.Web=[Web]::new()
     $settings.Web.PoolName=Get-ValueOrExitIfNull -Json $installSettingsJson -FileName $InstallSettingsJsonPath `
                                     -Property "roles.web.iis.pool-name"
@@ -102,6 +107,13 @@ function Get-InstallSettings{
                                     -Property "description"
     $settings.Environment.Url = Get-ValueOrExitIfNull -Json $environmentJson -FileName $environmentFile `
                                     -Property "url"
+
+    $settings.Environment.Admin=[Account]::new()
+    $settings.Environment.Admin.User=Get-ValueOrExitIfNull -Json $environmentJson -FileName $environmentFile `
+                                    -Property "admin.user"
+    $settings.Environment.Admin.Password=Get-ValueOrExitIfNull -Json $environmentJson -FileName $environmentFile `
+                                    -Property "admin.password"
+
     $settings.Environment.Nodes=@()
     
     $nodes=Get-ValueOrExitIfNull -Json $environmentJson -FileName $environmentFile `

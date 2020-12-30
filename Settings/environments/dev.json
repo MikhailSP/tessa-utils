@@ -3,6 +3,11 @@
   "description": "Development Tessa, all roles on the same machine",
   "url": "https://localhost/tessa",
   
+  "admin": {
+    "user": "admin",
+    "password": "admin"
+  },
+  
   "nodes": [
     {
       "name": "main",
