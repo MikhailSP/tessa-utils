@@ -683,12 +683,13 @@ function Get-TessaNode{
     [CmdletBinding()]
     param(
         [string] $EnvironmentFileName,
+        [string] $NodeName,
         [object] $EnvironmentJson
     )
     $node=$Null
 
     foreach($nodeJson in $EnvironmentJson.nodes){
-        if ($nodeJson.name -eq $NodeName){
+        if ($nodeJson.name.ToLower() -eq $NodeName.ToLower()){
             $node=$nodeJson
             break
         }
@@ -735,7 +736,7 @@ function Install-Tessa
         $EnvironmentName,
     
         [string]
-        $NodeName
+        $NodeName = $env:computername
     )
 
     Write-Verbose "Installing Tessa $TessaVersion with prerequisites for roles $( $ServerRoles|foreach { $_ } )"
@@ -752,7 +753,7 @@ function Install-Tessa
     $environmentJson=Get-Content $environmentFileName | Out-String | ConvertFrom-Json
     $appJsonPartOfEnvironment=$environmentJson.'app.json'
     $installSettingsPartOfEnvironment=$environmentJson.'install-settings'
-    $node=Get-TessaNode -EnvironmentFileName $environmentFileName -EnvironmentJson $environmentJson -Verbose
+    $node=Get-TessaNode -EnvironmentFileName $environmentFileName -NodeName $NodeName -EnvironmentJson $environmentJson -Verbose
     Write-Verbose "Installing node '$($node.name)' ($($node.description))"
 
     $serverRoles=Get-TessaNodeRole -Node $node
