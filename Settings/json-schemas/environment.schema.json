@@ -179,6 +179,20 @@
                 "folder": {
                   "type": "string"
                 },
+                "service": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "display-name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  }
+                },
                 "cluster": {
                   "type": "object",
                   "properties": {
@@ -187,6 +201,20 @@
                     },
                     "name": {
                       "type": "string"
+                    },
+                    "ip": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "ip": {
+                          "type": "string"
+                        }
+                      }
                     }
                   }
                 }

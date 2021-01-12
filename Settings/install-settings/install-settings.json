@@ -51,9 +51,19 @@
       "disabled": false,
       "folder" : "c:\\Tessa\\Chronos",
       "service-name": "Syntellect Chronos",
+      "service": {
+        "name": "chronos",
+        "display-name": "Syntellect Chronos",
+        "description": "Background services host for Syntellect TESSA system."
+      },
       "cluster": {
-        "disabled": false,
-        "name": "tessa-dev-chr"
+        "disabled": true,
+        "name": "tessa-dev-clr",
+        "ip": "10.204.200.1",
+        "role": {
+          "name": "tessa-dev-role",
+          "ip": "10.204.200.2"
+        }
       }
     },
     "sql": {
